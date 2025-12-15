@@ -1,0 +1,13 @@
+flask
+flask-cors
+python-dotenv
+groq
+numpy
+pandas
+openpyxl
+shap
+sentence-transformers
+faiss-cpu
+scikit-learn
+xgboost
+torch

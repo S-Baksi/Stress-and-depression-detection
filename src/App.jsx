@@ -17,9 +17,7 @@ import AnxietyForm from "./AnxietyForm";
 function PageContainer({ children }) {
   return (
     <div className="min-h-screen w-full bg-[#FBF7EE] text-gray-800 antialiased">
-      <div className="min-h-screen animate-fadeInSlow">
-        {children}
-      </div>
+      <div className="min-h-screen animate-fadeInSlow">{children}</div>
     </div>
   );
 }
@@ -37,8 +35,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       id: makeId(),
-      text:
-        "I am your caring assistant. You can talk to me freely about stress, anxiety, sleep, or health concerns. I’m here to help calmly and privately.",
+      text: "I am your caring assistant. You can talk to me freely about stress, anxiety, sleep, or health concerns. I’m here to help calmly and privately.",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -138,8 +135,7 @@ function App() {
         ...prev,
         {
           id: makeId(),
-          text:
-            "I’m here to support your health and well-being. Please try again in a moment.",
+          text: "I’m here to support your health and well-being. Please try again in a moment.",
           sender: "bot",
           timestamp: new Date(),
         },
@@ -156,8 +152,7 @@ function App() {
     setMessages([
       {
         id: makeId(),
-        text:
-          "I am your caring assistant. What would you like to talk about today?",
+        text: "I am your caring assistant. What would you like to talk about today?",
         sender: "bot",
         timestamp: new Date(),
       },
@@ -185,8 +180,7 @@ function App() {
   const handleAssessmentComplete = (assessment, type = "health") => {
     const prediction =
       assessment?.ml_output?.prediction || assessment?.prediction;
-    const explanation =
-      assessment?.llm_explanation || assessment?.explanation;
+    const explanation = assessment?.llm_explanation || assessment?.explanation;
 
     const typeLabel =
       type !== "health"

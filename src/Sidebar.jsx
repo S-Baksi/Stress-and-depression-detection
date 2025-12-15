@@ -1,37 +1,24 @@
 import { Link, useLocation } from "react-router-dom";
-import {
-  Menu,
-  X,
-  MessageSquare,
-  Library,
-  Clock,
-  Plus,
-} from "lucide-react";
+import { Menu, X, MessageSquare, Library, Clock, Plus } from "lucide-react";
 
-export default function Sidebar({ isOpen, onToggle }) {
+export default function Sidebar({ isOpen, onToggle, handleNewChat }) {
   const location = useLocation();
 
   const navItem = (to, label, Icon) => {
     const active = location.pathname === to;
 
     return (
-      <Link
-        to={to}
-        onClick={() => isOpen && onToggle()}
-        className="block"
-      >
+      <Link to={to} onClick={() => isOpen && onToggle()} className="block">
         <div
           className={`flex items-center gap-3 px-5 py-3 rounded-xl transition-all duration-200
             ${
               active
-                ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md"
+                ? "bg-linear-to-r from-cyan-600 to-blue-600 text-white shadow-md"
                 : "text-gray-300 hover:bg-gray-800/70 hover:text-white"
             }`}
         >
           <Icon size={18} />
-          <span className="text-sm font-medium truncate">
-            {label}
-          </span>
+          <span className="text-sm font-medium truncate">{label}</span>
         </div>
       </Link>
     );
@@ -42,18 +29,11 @@ export default function Sidebar({ isOpen, onToggle }) {
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-50 bg-gray-950/95 backdrop-blur border-b border-gray-800 px-4 py-3 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-white">
-            Health AI
-          </p>
-          <p className="text-xs text-gray-400">
-            Mental wellness assistant
-          </p>
+          <p className="text-sm font-semibold text-white">Health AI</p>
+          <p className="text-xs text-gray-400">Mental wellness assistant</p>
         </div>
 
-        <button
-          onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-gray-800"
-        >
+        <button onClick={onToggle} className="p-2 rounded-lg hover:bg-gray-800">
           {isOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
@@ -81,14 +61,15 @@ export default function Sidebar({ isOpen, onToggle }) {
               <h2 className="text-sm font-semibold text-white truncate">
                 Health Assistant
               </h2>
-              <p className="text-xs text-gray-400">
-                Online • Ready to help
-              </p>
+              <p className="text-xs text-gray-400">Online • Ready to help</p>
             </div>
           </div>
 
           {/* New Chat Button */}
-          <button className="mt-5 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 py-2.5 text-sm font-medium text-white hover:opacity-90 transition">
+          <button
+            className="mt-5 w-full flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-cyan-600 to-blue-600 py-2.5 text-sm font-medium text-white hover:opacity-90 transition"
+            onClick={handleNewChat}
+          >
             <Plus size={16} />
             New Chat
           </button>

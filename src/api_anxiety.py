@@ -5,13 +5,11 @@ import pickle
 import shap
 import pandas as pd
 import os
-from dotenv import load_dotenv
 
 from groq import Groq
 from sentence_transformers import SentenceTransformer
 import faiss
 
-load_dotenv()
 
 client = Groq(api_key="Groq_api_key")
 
@@ -20,7 +18,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-with open("depression_xgb_tuned_model.pkl", "rb") as f:
+with open("anxiety_xgb_tuned_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 explainer = shap.TreeExplainer(model)
@@ -74,7 +72,7 @@ def extract_shap_insights(shap_values, top_k=5):
 
 # rag retrieval
 def retrieve_resources(risk_increasing, top_k=2):
-    query = f"Indicators related to depression {', '.join(risk_increasing)}"
+    query = f"Indicators related to anxiety {', '.join(risk_increasing)}"
     query_embedding = embedding_model.encode([query])
 
     _, indices = RESOURCE_INDEX.search(np.array(query_embedding), top_k)
@@ -135,7 +133,7 @@ Health assessment result: {result['prediction']}
 Factors supporting Normal health:
 {risk_decreasing}
 
-Factors leading to depressed conditions:
+Factors leading to anxiety conditions:
 {risk_increasing}
 
 Helpful resources available in the app:
@@ -168,7 +166,7 @@ Explain:
         return None
 
 
-@app.route("/PredictDepression", methods=["POST"])
+@app.route("/PredictAnxiety", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
@@ -192,7 +190,7 @@ def predict():
         pred_class = int(np.argmax(proba))
         probability = round(float(np.max(proba)), 2)
 
-        prediction_label = "Normal" if pred_class == 0 else "Depressed"
+        prediction_label = "Normal" if pred_class == 0 else "Anxiety"
 
         shap_vals = explainer.shap_values(X)
         if isinstance(shap_vals, list):
@@ -222,4 +220,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(port=9093, debug=True)
+    app.run(port=9094, debug=True)
