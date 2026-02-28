@@ -4,6 +4,8 @@ python-dotenv
 groq
 numpy
 pandas
+scipy
+requests
 openpyxl
 shap
 sentence-transformers

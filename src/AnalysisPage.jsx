@@ -1,29 +1,33 @@
 import { useState, useEffect } from "react";
-import { Upload, Activity, File, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, Activity, File, CheckCircle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import Papa from "papaparse";
+import toast, { Toaster } from 'react-hot-toast';
 import Footer from "./Footer";
 import Header from "./Header";
 import dataInputImg from "./assets/data-input.svg";
 import sentimentAnalysisImg from "./assets/sentimentAnalysis.svg";
 
 const loadingMessages = [
+  "Uploading CSV file to server...",
   "Reading and validating CSV file...",
   "Processing brainwave data...",
+  "Extracting frequency band features...",
   "Analyzing alpha wave patterns...",
   "Analyzing beta wave patterns...",
   "Analyzing gamma wave patterns...",
-  "Analyzing delta wave patterns...",
+  "Analyzing delta and theta patterns...",
   "Running machine learning model...",
   "Calculating fatigue probability...",
-  "Generating visualization graphs...",
+  "Generating visualization data...",
   "Finalizing results..."
 ];
 
-const processChannelData = (csvData, channels) => {
+const API_BASE_URL = "http://localhost:5000";
+
+const processChannelData = (bandpowerFeatures, channels) => {
   const channelData = {};
   channels.forEach(channel => {
-    const processedData = csvData.map((row, index) => ({
+    const processedData = bandpowerFeatures.map((row, index) => ({
       window: index,
       delta: row[`delta_${channel}`] || 0,
       theta: row[`theta_${channel}`] || 0,
@@ -36,24 +40,10 @@ const processChannelData = (csvData, channels) => {
   return channelData;
 };
 
-const calculateFatigueLevel = (channelData, channels) => {
-  const allDeltas = channels.flatMap(ch => channelData[ch].map(d => d.delta));
-  const allThetas = channels.flatMap(ch => channelData[ch].map(d => d.theta));
-  const avgDelta = allDeltas.reduce((a, b) => a + b, 0) / allDeltas.length;
-  const avgTheta = allThetas.reduce((a, b) => a + b, 0) / allThetas.length;
-  const ratio = avgDelta / avgTheta;
-  
-  const fatigueLevel = ratio > 3 ? "High" : "Low";
-  const probability = ratio > 3 ? 0.75 + (Math.random() * 0.2) : 0.65 + (Math.random() * 0.25);
-  
-  return { fatigueLevel, probability };
-};
-
 function AnalysisPage() {
-  const [csvLink, setCsvLink] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
-  const [error, setError] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState("");
 
   useEffect(() => {
@@ -68,60 +58,107 @@ function AnalysisPage() {
     return () => clearInterval(interval);
   }, [isAnalyzing]);
 
-  const processCSVData = (parseResult) => {
-    const csvData = parseResult.data;
-    const channels = ["TP9", "AF7", "AF8", "TP10"];
-    
-    const channelData = processChannelData(csvData, channels);
-    const { fatigueLevel, probability } = calculateFatigueLevel(channelData, channels);
-    
-    setResults({
-      fatigue_level: fatigueLevel,
-      probability: probability,
-      channels: channelData
-    });
-    setError(null);
-    setIsAnalyzing(false);
-  };
-
-  const handleParseComplete = (parseResult) => {
-    setTimeout(() => {
-      processCSVData(parseResult);
-    }, 8000);
-  };
-
-  const handleParseError = (error) => {
-    setError("Failed to parse CSV file: " + error.message);
-    setIsAnalyzing(false);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.name.endsWith('.csv')) {
+        toast.error('Please select a CSV file');
+        return;
+      }
+      setSelectedFile(file);
+      toast.success(`File "${file.name}" selected successfully`);
+    }
   };
 
   const handleAnalyze = async (e) => {
     e.preventDefault();
-    if (!csvLink.trim()) return;
+    if (!selectedFile) {
+      toast.error('Please select a CSV file to analyze');
+      return;
+    }
     
     setIsAnalyzing(true);
-    setError(null);
     setResults(null);
 
     try {
-      const csvPath = "/src/EEGBandpowers_Testing.csv";
-      const response = await fetch(csvPath);
-      const csvText = await response.text();
-      
-      Papa.parse(csvText, {
-        header: true,
-        dynamicTyping: true,
-        complete: handleParseComplete,
-        error: handleParseError
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const response = await fetch(`${API_BASE_URL}/predict`, {
+        method: 'POST',
+        body: formData,
       });
-    } catch {
-      setError("Failed to load CSV file. Please ensure the file exists.");
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze EEG data');
+      }
+
+      const data = await response.json();
+      
+      // Process API response to match expected format
+      const channels = ["TP9", "AF7", "AF8", "TP10"];
+      const channelData = processChannelData(data.eeg_bandpower_features, channels);
+      
+      // Map API fatigue levels to frontend format
+      let fatigueLevel = "Low";
+      if (data.fatigue_level === "High Fatigue" || data.fatigue_level === "Fatigue") {
+        fatigueLevel = "High";
+      }
+      
+      setResults({
+        fatigue_level: fatigueLevel,
+        probability: data.probability,
+        channels: channelData
+      });
+      
+      toast.success('Analysis completed successfully!');
+      
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to analyze EEG data. Please ensure the API server is running.';
+      toast.error(errorMessage, { duration: 5000 });
+    } finally {
       setIsAnalyzing(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex flex-col overflow-x-hidden">
+    {/* showing the toast message on the top right corner */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#fff',
+            color: '#1f2937',
+            border: '2px solid #e5e7eb',
+            borderRadius: '12px',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '500',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+            duration: 5000,
+          },
+          loading: {
+            iconTheme: {
+              primary: '#3b82f6',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       {/* Header */}
         <Header/>
 
@@ -145,21 +182,29 @@ function AnalysisPage() {
             </h3>
           <form onSubmit={handleAnalyze} className="space-y-4">
             <div>
-              <label htmlFor="csv-link" className="block text-sm font-medium text-gray-700 mb-2">
-                CSV File Link or Upload Path
+              <label htmlFor="csv-file" className="block text-sm font-medium text-gray-700 mb-2">
+                Select CSV File
               </label>
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
+                <label 
+                  htmlFor="csv-file"
+                  className="flex-1 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-slate-400 cursor-pointer transition-colors bg-gray-50 hover:bg-gray-100 flex items-center gap-2"
+                >
+                  <File size={20} className="text-gray-500" />
+                  <span className="text-gray-700 text-sm">
+                    {selectedFile ? selectedFile.name : 'Choose CSV file...'}
+                  </span>
+                </label>
                 <input
-                  id="csv-link"
-                  type="text"
-                  value={csvLink}
-                  onChange={(e) => setCsvLink(e.target.value)}
-                  placeholder="Enter CSV file link or path..."
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  id="csv-file"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
                 <button
                   type="submit"
-                  disabled={isAnalyzing || !csvLink.trim()}
+                  disabled={isAnalyzing || !selectedFile}
                   className="px-6 py-3 bg-slate-800 text-white font-semibold rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-slate-800 flex items-center gap-2 transition-all transform hover:scale-105"
                 >
                   {isAnalyzing ? (
@@ -178,7 +223,7 @@ function AnalysisPage() {
             </div>
             <p className="text-xs text-gray-500 flex items-center gap-2">
               <File size={14} />
-              CSV file should contain columns: alpha, beta, gamma, delta levels
+              CSV file should contain EEG raw data with columns: TP9, AF7, AF8, TP10
             </p>
           </form>
           {/* Loading Message */}
@@ -191,13 +236,6 @@ function AnalysisPage() {
                   <p className="text-blue-700 text-sm mt-1">{loadingMessage}</p>
                 </div>
               </div>
-            </div>
-          )}
-          {/* Error Message */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-xl flex items-start gap-3">
-              <AlertCircle className="text-red-600 shrink-0" size={20} />
-              <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
           </div>
