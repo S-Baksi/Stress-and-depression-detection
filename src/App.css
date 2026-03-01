@@ -1,3 +1,4 @@
-*{
-    user-select: none;
+/* Global app-level overrides */
+html {
+    scroll-behavior: smooth;
 }
