@@ -24,6 +24,30 @@ const loadingMessages = [
 
 const API_BASE_URL = "http://localhost:5000";
 
+const CHART_COLORS = {
+  delta: "#6366f1",
+  theta: "#8b5cf6",
+  alpha: "#10b981",
+  beta: "#f59e0b",
+  gamma: "#f43f5e"
+};
+
+const BAND_BG = {
+  delta: "#eef2ff",
+  theta: "#f5f3ff",
+  alpha: "#ecfdf5",
+  beta: "#fffbeb",
+  gamma: "#fff1f2"
+};
+
+const BAND_TEXT = {
+  delta: "#4f46e5",
+  theta: "#7c3aed",
+  alpha: "#059669",
+  beta: "#d97706",
+  gamma: "#e11d48"
+};
+
 const processChannelData = (bandpowerFeatures, channels) => {
   const channelData = {};
   channels.forEach(channel => {
@@ -76,7 +100,7 @@ function AnalysisPage() {
       toast.error('Please select a CSV file to analyze');
       return;
     }
-    
+
     setIsAnalyzing(true);
     setResults(null);
 
@@ -95,25 +119,23 @@ function AnalysisPage() {
       }
 
       const data = await response.json();
-      
-      // Process API response to match expected format
+
       const channels = ["TP9", "AF7", "AF8", "TP10"];
       const channelData = processChannelData(data.eeg_bandpower_features, channels);
-      
-      // Map API fatigue levels to frontend format
+
       let fatigueLevel = "Low";
       if (data.fatigue_level === "High Fatigue" || data.fatigue_level === "Fatigue") {
         fatigueLevel = "High";
       }
-      
+
       setResults({
         fatigue_level: fatigueLevel,
         probability: data.probability,
         channels: channelData
       });
-      
+
       toast.success('Analysis completed successfully!');
-      
+
     } catch (err) {
       const errorMessage = err.message || 'Failed to analyze EEG data. Please ensure the API server is running.';
       toast.error(errorMessage, { duration: 5000 });
@@ -123,346 +145,231 @@ function AnalysisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex flex-col overflow-x-hidden">
-    {/* showing the toast message on the top right corner */}
-      <Toaster 
+    <div className="min-h-screen flex flex-col overflow-x-hidden" style={{ backgroundColor: 'var(--bg-body)' }}>
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 4000,
           style: {
             background: '#fff',
-            color: '#00695C',
-            border: '2px solid #4DB6AC',
-            borderRadius: '12px',
-            padding: '16px',
-            fontSize: '14px',
+            color: 'var(--text-heading)',
+            border: '1px solid var(--border-default)',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            fontSize: '13px',
             fontWeight: '500',
+            boxShadow: 'var(--shadow-md)',
           },
-          success: {
-            iconTheme: {
-              primary: '#26A69A',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#00695C',
-              secondary: '#fff',
-            },
-            duration: 5000,
-          },
-          loading: {
-            iconTheme: {
-              primary: '#00897B',
-              secondary: '#fff',
-            },
-          },
+          success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#f43f5e', secondary: '#fff' }, duration: 5000 },
+          loading: { iconTheme: { primary: '#6366f1', secondary: '#fff' } },
         }}
       />
-      {/* Header */}
-        <Header/>
+
+      <Header />
 
       <div className="flex-1">
-        {/* Main Content */}
-        <section className="px-8 py-6">
-        <div className="mb-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            EEG Brainwave Analysis
-          </h2>
-          <p className="text-gray-600">
-            Upload your CSV file to analyze brainwave patterns across all frequency bands and channels
-          </p>
-        </div>
-
-        {/* Upload Section */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6 -mx-8 px-8 py-6 border-y-2" style={{ backgroundColor: 'var(--bg-primary-lighter)', borderColor: 'var(--border-primary-light)' }}>
-          <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-white)', border: '2px solid var(--border-primary-light)' }}>
-            <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-dark)' }}>
-              Upload EEG Data
-            </h3>
-          <form onSubmit={handleAnalyze} className="space-y-4">
-            <div>
-              <label htmlFor="csv-file" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-gray)' }}>
-                Select CSV File
-              </label>
-              <div className="flex gap-3 items-center">
-                <label 
-                  htmlFor="csv-file"
-                  className="flex-1 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors flex items-center gap-2"
-                  style={{ 
-                    borderColor: 'var(--border-gray)',
-                    backgroundColor: 'var(--bg-gray)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-primary)';
-                    e.currentTarget.style.backgroundColor = 'var(--bg-primary-lighter)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-gray)';
-                    e.currentTarget.style.backgroundColor = 'var(--bg-gray)';
-                  }}
-                >
-                  <File size={20} style={{ color: 'var(--text-light)' }} />
-                  <span className="text-sm" style={{ color: 'var(--text-gray)' }}>
-                    {selectedFile ? selectedFile.name : 'Choose CSV file...'}
-                  </span>
-                </label>
-                <input
-                  id="csv-file"
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <button
-                  type="submit"
-                  disabled={isAnalyzing || !selectedFile}
-                  className="px-6 py-3 font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-                  style={{
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-white)'
-                  }}
-                  onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-primary)'}
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Activity className="animate-spin" size={20} />
-                      Analyzing
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={20} />
-                      Analyze
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-            <p className="text-xs flex items-center gap-2" style={{ color: 'var(--text-light)' }}>
-              <File size={14} />
-              CSV file should contain EEG raw data with columns: TP9, AF7, AF8, TP10
+        <section className="px-8 md:px-12 py-8">
+          {/* Page title */}
+          <div className="mb-5">
+            <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-heading)' }}>
+              EEG Brainwave Analysis
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--text-body)' }}>
+              Upload your CSV file to analyze brainwave patterns across all frequency bands and channels
             </p>
-          </form>
-          {/* Loading Message */}
-          {isAnalyzing && (
-            <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-primary-lighter)', border: '2px solid var(--border-primary-light)' }}>
-              <div className="flex items-center gap-4">
-                <Activity className="animate-spin" size={24} style={{ color: 'var(--text-primary)' }} />
+          </div>
+
+          {/* Upload area */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="card p-5">
+              <h2 className="text-base font-semibold mb-3" style={{ color: 'var(--text-heading)' }}>
+                Upload EEG Data
+              </h2>
+
+              <form onSubmit={handleAnalyze} className="space-y-3">
                 <div>
-                  <p className="font-semibold" style={{ color: 'var(--text-primary-dark)' }}>Processing Analysis</p>
-                  <p className="text-sm mt-1" style={{ color: 'var(--text-primary)' }}>{loadingMessage}</p>
+                  <label htmlFor="csv-file" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-body)' }}>
+                    Select CSV File
+                  </label>
+                  <div className="flex gap-2.5 items-center">
+                    <label
+                      htmlFor="csv-file"
+                      className="flex-1 px-3.5 py-2.5 border-2 border-dashed rounded-xl cursor-pointer transition-all flex items-center gap-2"
+                      style={{ borderColor: 'var(--slate-300)', backgroundColor: 'var(--bg-muted)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--indigo-400)';
+                        e.currentTarget.style.backgroundColor = 'var(--indigo-50)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--slate-300)';
+                        e.currentTarget.style.backgroundColor = 'var(--bg-muted)';
+                      }}
+                    >
+                      <File size={16} style={{ color: 'var(--text-muted)' }} />
+                      <span className="text-sm" style={{ color: selectedFile ? 'var(--text-heading)' : 'var(--text-muted)' }}>
+                        {selectedFile ? selectedFile.name : 'Choose CSV file...'}
+                      </span>
+                    </label>
+                    <input
+                      id="csv-file"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isAnalyzing || !selectedFile}
+                      className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <Activity className="animate-spin" size={16} />
+                          Analyzing…
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} />
+                          Analyze
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[11px] flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+                  <File size={11} />
+                  CSV should contain EEG raw data with columns: TP9, AF7, AF8, TP10
+                </p>
+              </form>
+
+              {isAnalyzing && (
+                <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--indigo-50)', border: '1px solid var(--indigo-100)' }}>
+                  <div className="flex items-center gap-2.5">
+                    <Activity className="animate-spin" size={18} style={{ color: 'var(--indigo-600)' }} />
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text-heading)' }}>Processing…</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--indigo-600)' }}>{loadingMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="hidden md:flex items-center justify-center">
+              <img src={dataInputImg} alt="Upload Data" className="w-full max-w-sm" />
+            </div>
+          </div>
+
+          {/* Results */}
+          {results && (
+            <div className="space-y-4">
+              {/* Summary */}
+              <div className="card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle size={18} style={{ color: '#10b981' }} />
+                  <h2 className="text-base font-semibold" style={{ color: 'var(--text-heading)' }}>Analysis Results</h2>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-3 items-center">
+                  <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border-default)' }}>
+                    <p className="text-[11px] font-medium mb-1 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Fatigue Level</p>
+                    <p className="text-2xl font-bold" style={{
+                      color: results.fatigue_level === "High" ? '#f43f5e' : '#10b981'
+                    }}>
+                      {results.fatigue_level}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border-default)' }}>
+                    <p className="text-[11px] font-medium mb-1 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Confidence Score</p>
+                    <p className="text-2xl font-bold" style={{ color: 'var(--indigo-600)' }}>
+                      {(results.probability * 100).toFixed(1)}%
+                    </p>
+                  </div>
+
+                  <div className="hidden md:flex justify-center">
+                    <img src={sentimentAnalysisImg} alt="Success" className="w-24 h-24" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Charts */}
+              {["TP9", "AF7", "AF8", "TP10"].map((channel) => (
+                <div key={channel} className="card p-5">
+                  <h3 className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-heading)' }}>
+                    {channel} Channel
+                  </h3>
+                  <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+                    Band power distribution across time windows
+                  </p>
+
+                  <ResponsiveContainer width="100%" height={340}>
+                    <LineChart data={results.channels[channel]} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--slate-200)" />
+                      <XAxis dataKey="window" label={{ value: 'Window', position: 'insideBottom', offset: -5 }} stroke="var(--slate-400)" tick={{ fontSize: 11 }} />
+                      <YAxis label={{ value: 'Band Power', angle: -90, position: 'insideLeft' }} stroke="var(--slate-400)" tick={{ fontSize: 11 }} />
+                      <Tooltip contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid var(--slate-200)',
+                        borderRadius: '8px',
+                        boxShadow: 'var(--shadow-md)',
+                        fontSize: '12px'
+                      }} />
+                      <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} iconType="line" />
+                      {Object.entries(CHART_COLORS).map(([band, color]) => (
+                        <Line key={band} type="monotone" dataKey={band} stroke={color} strokeWidth={2} dot={false} name={band} />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+
+                  <div className="mt-3 grid grid-cols-5 gap-2">
+                    {["delta", "theta", "alpha", "beta", "gamma"].map((band) => {
+                      const values = results.channels[channel].map(d => d[band]);
+                      const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+                      const max = Math.max(...values).toFixed(2);
+                      const min = Math.min(...values).toFixed(2);
+
+                      return (
+                        <div key={band} className="rounded-lg p-2.5" style={{ backgroundColor: BAND_BG[band] }}>
+                          <p className="text-[11px] font-semibold uppercase mb-0.5" style={{ color: BAND_TEXT[band] }}>{band}</p>
+                          <p className="text-[11px]" style={{ color: 'var(--text-body)' }}>Avg: <strong>{avg}</strong></p>
+                          <p className="text-[11px]" style={{ color: 'var(--text-body)' }}>Max: <strong>{max}</strong></p>
+                          <p className="text-[11px]" style={{ color: 'var(--text-body)' }}>Min: <strong>{min}</strong></p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Legend */}
+              <div className="card p-4">
+                <h3 className="text-sm font-semibold mb-1.5" style={{ color: 'var(--text-heading)' }}>Understanding Your Results</h3>
+                <p className="text-xs leading-relaxed mb-2.5" style={{ color: 'var(--text-body)' }}>
+                  Each graph shows EEG data from a different electrode. Lines represent brainwave frequency power levels across time windows.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {[
+                    { band: "delta", label: "Sleep & Recovery" },
+                    { band: "theta", label: "Relaxation" },
+                    { band: "alpha", label: "Calm Focus" },
+                    { band: "beta", label: "Active Thinking" },
+                    { band: "gamma", label: "Peak Focus" }
+                  ].map(({ band, label }) => (
+                    <div key={band} className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS[band] }} />
+                      <span className="text-xs" style={{ color: 'var(--text-body)' }}>{label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           )}
-          </div>
-          
-          <div className="hidden md:flex items-center justify-center">
-            <img 
-              src={dataInputImg} 
-              alt="Upload Data Illustration" 
-              className="w-full max-w-md"
-            />
-          </div>
-        </div>
-
-        {/* Results Section */}
-        {results && (
-          <div className="space-y-4">
-            {/* Fatigue Level Result */}
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--bg-white)', border: '2px solid var(--border-primary-light)' }}>
-              <div className="flex items-center gap-3 mb-4">
-                <CheckCircle size={24} style={{ color: 'var(--primary-medium)' }} />
-                <h3 className="text-xl font-semibold" style={{ color: 'var(--text-dark)' }}>Analysis Results</h3>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-4 items-center">
-                <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-gray)', border: '2px solid var(--border-primary-light)' }}>
-                  <p className="text-sm font-medium mb-2" style={{ color: 'var(--text-gray)' }}>Fatigue Level</p>
-                  <p className={`text-3xl font-bold`} style={{
-                    color: results.fatigue_level === "High" ? 'var(--primary-darker)' : 'var(--primary-medium)'
-                  }}>
-                    {results.fatigue_level}
-                  </p>
-                </div>
-                
-                <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-gray)', border: '2px solid var(--border-primary-light)' }}>
-                  <p className="text-sm font-medium mb-2" style={{ color: 'var(--text-gray)' }}>Confidence Score</p>
-                  <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {(results.probability * 100).toFixed(1)}%
-                  </p>
-                </div>
-                
-                <div className="hidden md:flex justify-center">
-                  <img 
-                    src={sentimentAnalysisImg} 
-                    alt="Success Illustration" 
-                    className="w-32 h-32"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Graphs Section - One for each channel */}
-            {["TP9", "AF7", "AF8", "TP10"].map((channel) => (
-              <div key={channel} className="rounded-xl p-6" style={{ backgroundColor: 'var(--bg-white)', border: '2px solid var(--border-primary-light)' }}>
-                <h3 className="text-xl font-semibold mb-1" style={{ color: 'var(--text-dark)' }}>
-                  {channel} Channel Analysis
-                </h3>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-gray)' }}>
-                  Band power distribution across time windows
-                </p>
-                
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart
-                    data={results.channels[channel]}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#B2DFDB" />
-                    <XAxis 
-                      dataKey="window" 
-                      label={{ value: 'Window', position: 'insideBottom', offset: -5 }}
-                      stroke="#4DB6AC"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis 
-                      label={{ value: 'Band Power', angle: -90, position: 'insideLeft' }}
-                      stroke="#4DB6AC"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #4DB6AC',
-                        borderRadius: '6px',
-                        boxShadow: '0 1px 3px 0 rgba(0, 137, 123, 0.1)',
-                        fontSize: '12px'
-                      }}
-                    />
-                    <Legend 
-                      wrapperStyle={{ paddingTop: '16px', fontSize: '12px' }}
-                      iconType="line"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="delta" 
-                      stroke="#00897B" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="delta"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="theta" 
-                      stroke="#26A69A" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="theta"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="alpha" 
-                      stroke="#4DB6AC" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="alpha"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="beta" 
-                      stroke="#80CBC4" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="beta"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="gamma" 
-                      stroke="#B2DFDB" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="gamma"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-                
-                {/* Statistical Summary for this channel */}
-                <div className="mt-4 grid grid-cols-5 gap-2">
-                  {["delta", "theta", "alpha", "beta", "gamma"].map((band) => {
-                    const values = results.channels[channel].map(d => d[band]);
-                    const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
-                    const max = Math.max(...values).toFixed(2);
-                    const min = Math.min(...values).toFixed(2);
-                    
-                    const colors = {
-                      delta: "text-white",
-                      theta: "text-white",
-                      alpha: "text-white",
-                      beta: "text-white",
-                      gamma: "text-white"
-                    };
-                    
-                    const bgColors = {
-                      delta: "#00897B",
-                      theta: "#26A69A",
-                      alpha: "#4DB6AC",
-                      beta: "#80CBC4",
-                      gamma: "#B2DFDB"
-                    };
-                    
-                    return (
-                      <div key={band} className={`rounded-xl p-4 border-2 ${colors[band]}`} style={{ 
-                        backgroundColor: bgColors[band],
-                        borderColor: bgColors[band]
-                      }}>
-                        <p className="text-xs font-semibold uppercase mb-1">{band}</p>
-                        <p className="text-xs">Avg: <strong>{avg}</strong></p>
-                        <p className="text-xs">Max: <strong>{max}</strong></p>
-                        <p className="text-xs">Min: <strong>{min}</strong></p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* Overall Interpretation */}
-            <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-primary-lighter)', border: '2px solid var(--border-primary-light)' }}>
-              <h4 className="text-base font-semibold mb-2" style={{ color: 'var(--text-primary-dark)' }}>Understanding Your Results</h4>
-              <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-gray)' }}>
-                Each graph represents EEG data from a different electrode placement. The lines show power levels 
-                of different brainwave frequencies measured across time windows.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#00897B' }}></div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-gray)' }}>Delta: Sleep & Recovery</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#26A69A' }}></div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-gray)' }}>Theta: Relaxation</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4DB6AC' }}></div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-gray)' }}>Alpha: Calm Focus</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#80CBC4' }}></div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-gray)' }}>Beta: Active Thinking</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#B2DFDB' }}></div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-gray)' }}>Gamma: Peak Focus</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         </section>
       </div>
-        {/* Footer */}
-        <Footer />
+
+      <Footer />
     </div>
   );
 }

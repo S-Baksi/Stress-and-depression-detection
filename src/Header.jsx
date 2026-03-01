@@ -11,8 +11,7 @@ const Header = () => {
       backgroundColor: 'rgba(255,255,255,0.8)',
       borderColor: 'var(--border-default)'
     }}>
-      <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
-        {/* Logo */}
+      <div className="px-8 md:px-12 py-3.5 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: 'var(--indigo-600)' }}>
             <Brain className="text-white" size={18} />
@@ -23,7 +22,6 @@ const Header = () => {
           </div>
         </Link>
 
-        {/* Navigation */}
         {!isHome && (
           <Link
             to="/"
