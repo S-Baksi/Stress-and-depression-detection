@@ -2,14 +2,9 @@ import numpy as np
 import pandas as pd
 from scipy.signal import butter, filtfilt
 import pickle
-import os
-import tempfile
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
-# Get the directory where this script is located
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(SCRIPT_DIR, 'rf_pred.pkl')
+import traceback
 
 class Prediction:
 
@@ -131,16 +126,12 @@ class Prediction:
         
         df_features = self.aggregate_period_features(df_bandpower)
         #df_features.to_csv('EEGFeatures_Testing.csv')
-        
-        # Convert all columns to float64 to avoid dtype issues
-        df_features = df_features.astype('float64')
-        
-        with open(MODEL_PATH, "rb") as f:
+        with open("C:/Users/ASUS/OneDrive/Desktop/projects/Stress-and-depression-detection/src/rf_pred.pkl", "rb") as f:
             loaded_artifact = pickle.load(f)
 
         rf_loaded = loaded_artifact["model"]
         _features = loaded_artifact["features"]
-        X_test_loaded = df_features[_features].values  # Convert to numpy array
+        X_test_loaded = df_features[_features]
         y_pred = rf_loaded.predict(X_test_loaded)
 
         y_proba = rf_loaded.predict_proba(X_test_loaded)
@@ -159,119 +150,55 @@ class Prediction:
         class_name = class_map[y_pred]
 
         return {"EEGBandPowerFeatures":df_bandpower,"FatigueLevel":class_name,"Probability": pred_prob}
+#result = Prediction().GenerateResult('C:/Users/AYUSH/Documents/MentalFatigueCode/P_11_S1_Test_Period_MentalFatigue.csv')
 
 
-# Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
-@app.route('/predict', methods=['POST'])
-def predict():
+
+@app.route("/predict-fatigue", methods=["POST"])
+def predict_fatigue():
     """
-    POST endpoint to predict fatigue level from uploaded EEG CSV file.
-    
-    Expects:
-    - File upload with field name 'file'
-    - CSV must contain columns: TP9, AF7, AF8, TP10
-    
-    Returns:
-    - JSON with fatigue prediction results
+    Expected JSON:
+    {
+        "csv_path": "C:/path/to/eeg.csv"
+    }
     """
     try:
-        # Check if file was uploaded
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file uploaded'}), 400
+        data = request.get_json(force=True, silent=True)
         
-        file = request.files['file']
-        
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-        
-        if not file.filename.endswith('.csv'):
-            return jsonify({'error': 'File must be a CSV'}), 400
-        
-        # Save uploaded file to temporary location
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.csv')
-        file.save(temp_file.name)
-        temp_file.close()
-        
-        try:
-            # Create prediction instance and generate result
-            predictor = Prediction()
-            result = predictor.GenerateResult(temp_file.name)
-            
-            # Clean up temporary file
-            os.unlink(temp_file.name)
-            
-            # Convert DataFrame to JSON-serializable format
-            bandpower_features = result["EEGBandPowerFeatures"].to_dict(orient='records')
-            
-            # Create descriptive message based on fatigue level
-            fatigue_level = result["FatigueLevel"]
-            probability = result["Probability"]
-            probability_percent = round(probability * 100, 1)
-            
-            if fatigue_level == "Normal":
-                message = f"Analysis shows normal mental state with {probability_percent}% confidence. No signs of significant fatigue detected."
-                recommendation = "You are in a good mental state. Continue maintaining healthy sleep and work patterns."
-            elif fatigue_level == "Fatigue":
-                message = f"Moderate fatigue detected with {probability_percent}% confidence. Signs of mental tiredness are present."
-                recommendation = "Consider taking short breaks and ensure adequate rest. Monitor your mental state."
-            else:  # High Fatigue
-                message = f"High fatigue level detected with {probability_percent}% confidence. Significant mental exhaustion identified."
-                recommendation = "It is strongly recommended to rest immediately. Avoid demanding tasks and prioritize sleep."
-            
-            response_data = {
-                'success': True,
-                'fatigue_level': fatigue_level,
-                'fatigue_status': fatigue_level.upper(),
-                'probability': probability,
-                'probability_percent': probability_percent,
-                'confidence_score': f"{probability_percent}%",
-                'message': message,
-                'recommendation': recommendation,
-                'interpretation': f"The person is classified as {fatigue_level} with a confidence score of {probability_percent}%.",
-                'eeg_bandpower_features': bandpower_features
-            }
-            
-            return jsonify(response_data), 200
-            
-        except Exception as e:
-            # Clean up temporary file if it still exists
-            if os.path.exists(temp_file.name):
-                os.unlink(temp_file.name)
-            raise e
-        
-    except ValueError as ve:
-        return jsonify({'error': f'Invalid data: {str(ve)}'}), 400
-    except FileNotFoundError as fe:
-        return jsonify({'error': f'File not found: {str(fe)}'}), 404
+        if not data or "csv_path" not in data:
+            print("Invalid request data:", data)
+            return jsonify({
+                "status": "error",
+                "message": "csv_path is required"
+            }), 400
+
+        csv_path = data["csv_path"]
+
+        predictor = Prediction()
+        result = predictor.GenerateResult(csv_path)
+
+        # Convert bandpower DF to JSON
+        result["EEGBandPowerFeatures"] = (
+            result["EEGBandPowerFeatures"]
+            .round(6)
+            .to_dict(orient="records")
+        )
+
+        return jsonify({
+            "status": "success",
+            "result": result
+        }), 200
+
     except Exception as e:
-        return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e),
+            "trace": traceback.format_exc()
+        }), 500
 
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({'status': 'healthy', 'message': 'Fatigue Detection API is running'}), 200
-
-
-if __name__ == '__main__':
-    # Check if model file exists
-    print(f"Looking for model file at: {MODEL_PATH}")
-    if not os.path.exists(MODEL_PATH):
-        print(f"ERROR: Model file 'rf_pred.pkl' not found at: {MODEL_PATH}")
-        print(f"Current working directory: {os.getcwd()}")
-        print(f"Script directory: {SCRIPT_DIR}")
-        print("Please ensure the model file is in the src directory.")
-        exit(1)
-    else:
-        print("✓ Model file found successfully!")
-    
-    print("\nStarting Fatigue Detection API...")
-    print("API will be available at: http://localhost:5000")
-    print("\nEndpoints:")
-    print("  POST /predict - Upload EEG CSV file for fatigue prediction")
-    print("  GET  /health  - Health check")
-    
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

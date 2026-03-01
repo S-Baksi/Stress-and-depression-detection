@@ -65,7 +65,7 @@ const processChannelData = (bandpowerFeatures, channels) => {
 };
 
 function AnalysisPage() {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [csvPath, setCsvPath] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -82,22 +82,10 @@ function AnalysisPage() {
     return () => clearInterval(interval);
   }, [isAnalyzing]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.name.endsWith('.csv')) {
-        toast.error('Please select a CSV file');
-        return;
-      }
-      setSelectedFile(file);
-      toast.success(`File "${file.name}" selected successfully`);
-    }
-  };
-
   const handleAnalyze = async (e) => {
     e.preventDefault();
-    if (!selectedFile) {
-      toast.error('Please select a CSV file to analyze');
+    if (!csvPath) {
+      toast.error('Please enter the CSV file path');
       return;
     }
 
@@ -105,38 +93,51 @@ function AnalysisPage() {
     setResults(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await fetch(`${API_BASE_URL}/predict`, {
+      const response = await fetch(`${API_BASE_URL}/predict-fatigue`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ csv_path: csvPath }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to analyze EEG data');
+        const errorData = await response.json().catch(() => ({ message: 'Server error' }));
+        throw new Error(errorData.message || `Server returned error: ${response.status}`);
       }
 
       const data = await response.json();
+      
+      // Check if response has the expected structure
+      if (!data.result?.EEGBandPowerFeatures) {
+        throw new Error('Invalid response format from server');
+      }
 
       const channels = ["TP9", "AF7", "AF8", "TP10"];
-      const channelData = processChannelData(data.eeg_bandpower_features, channels);
+      const channelData = processChannelData(data.result.EEGBandPowerFeatures, channels);
 
-      let fatigueLevel = "Low";
-      if (data.fatigue_level === "High Fatigue" || data.fatigue_level === "Fatigue") {
-        fatigueLevel = "High";
+      // Map backend fatigue level to display format
+      const backendFatigue = data.result.FatigueLevel;
+      let fatigueLevel;
+      
+      if (backendFatigue === "High Fatigue") {
+        fatigueLevel = "High Fatigue";
+      } else if (backendFatigue === "Fatigue") {
+        fatigueLevel = "Fatigue";
+      } else {
+        fatigueLevel = "Normal";
       }
 
       setResults({
         fatigue_level: fatigueLevel,
-        probability: data.probability,
+        probability: data.result.Probability || 0,
         channels: channelData
       });
 
       toast.success('Analysis completed successfully!');
 
     } catch (err) {
+      console.error('Analysis error:', err);
       const errorMessage = err.message || 'Failed to analyze EEG data. Please ensure the API server is running.';
       toast.error(errorMessage, { duration: 5000 });
     } finally {
@@ -189,38 +190,26 @@ function AnalysisPage() {
 
               <form onSubmit={handleAnalyze} className="space-y-3">
                 <div>
-                  <label htmlFor="csv-file" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-body)' }}>
-                    Select CSV File
+                  <label htmlFor="csv-path" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-body)' }}>
+                    CSV File Path
                   </label>
                   <div className="flex gap-2.5 items-center">
-                    <label
-                      htmlFor="csv-file"
-                      className="flex-1 px-3.5 py-2.5 border-2 border-dashed rounded-xl cursor-pointer transition-all flex items-center gap-2"
-                      style={{ borderColor: 'var(--slate-300)', backgroundColor: 'var(--bg-muted)' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--indigo-400)';
-                        e.currentTarget.style.backgroundColor = 'var(--indigo-50)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--slate-300)';
-                        e.currentTarget.style.backgroundColor = 'var(--bg-muted)';
-                      }}
-                    >
-                      <File size={16} style={{ color: 'var(--text-muted)' }} />
-                      <span className="text-sm" style={{ color: selectedFile ? 'var(--text-heading)' : 'var(--text-muted)' }}>
-                        {selectedFile ? selectedFile.name : 'Choose CSV file...'}
-                      </span>
-                    </label>
                     <input
-                      id="csv-file"
-                      type="file"
-                      accept=".csv"
-                      onChange={handleFileChange}
-                      className="hidden"
+                      id="csv-path"
+                      type="text"
+                      value={csvPath}
+                      onChange={(e) => setCsvPath(e.target.value)}
+                      placeholder="C:/path/to/your/file.csv"
+                      className="flex-1 px-3.5 py-2.5 border-2 rounded-xl transition-all text-sm"
+                      style={{ 
+                        borderColor: 'var(--slate-300)', 
+                        backgroundColor: 'var(--bg-muted)',
+                        color: 'var(--text-heading)'
+                      }}
                     />
                     <button
                       type="submit"
-                      disabled={isAnalyzing || !selectedFile}
+                      disabled={isAnalyzing || !csvPath}
                       className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
                     >
                       {isAnalyzing ? (
@@ -239,7 +228,7 @@ function AnalysisPage() {
                 </div>
                 <p className="text-[11px] flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                   <File size={11} />
-                  CSV should contain EEG raw data with columns: TP9, AF7, AF8, TP10
+                  Enter full path to CSV file containing EEG raw data with columns: TP9, AF7, AF8, TP10
                 </p>
               </form>
 
@@ -275,7 +264,8 @@ function AnalysisPage() {
                   <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border-default)' }}>
                     <p className="text-[11px] font-medium mb-1 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Fatigue Level</p>
                     <p className="text-2xl font-bold" style={{
-                      color: results.fatigue_level === "High" ? '#f43f5e' : '#10b981'
+                      color: results.fatigue_level === "High" ? '#f43f5e' : 
+                             results.fatigue_level === "Moderate" ? '#f59e0b' : '#10b981'
                     }}>
                       {results.fatigue_level}
                     </p>
@@ -284,7 +274,7 @@ function AnalysisPage() {
                   <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border-default)' }}>
                     <p className="text-[11px] font-medium mb-1 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Confidence Score</p>
                     <p className="text-2xl font-bold" style={{ color: 'var(--indigo-600)' }}>
-                      {(results.probability * 100).toFixed(1)}%
+                      {((results.probability || 0) * 100).toFixed(1)}%
                     </p>
                   </div>
 
