@@ -115,8 +115,8 @@ class Prediction:
 
         return pd.DataFrame([period_features])
     
-    def GenerateResult(self, EEGFeaturesCSVPath):
-        df = pd.read_csv(EEGFeaturesCSVPath)
+    def generate_result(self, eeg_features_csv_path):
+        df = pd.read_csv(eeg_features_csv_path)
         channels = ["TP9", "AF7", "AF8", "TP10"]
 
         df_bandpower = self.eeg_to_bandpower(
@@ -147,10 +147,10 @@ class Prediction:
             # If for some reason it's already usable, just leave it as-is
             pass
 
-        X_test_loaded = df_features[_features]
-        y_pred = rf_loaded.predict(X_test_loaded)
+        x_test_loaded = df_features[_features]
+        y_pred = rf_loaded.predict(x_test_loaded)
 
-        y_proba = rf_loaded.predict_proba(X_test_loaded)
+        y_proba = rf_loaded.predict_proba(x_test_loaded)
 
         predicted_class_prob = y_proba[np.arange(len(y_pred)), y_pred]
 
@@ -166,7 +166,6 @@ class Prediction:
         class_name = class_map[y_pred]
 
         return {"EEGBandPowerFeatures":df_bandpower,"FatigueLevel":class_name,"Probability": pred_prob}
-#result = Prediction().GenerateResult('C:/Users/AYUSH/Documents/MentalFatigueCode/P_11_S1_Test_Period_MentalFatigue.csv')
 
 
 app = Flask(__name__)
@@ -194,7 +193,7 @@ def predict_fatigue():
         csv_path = data["csv_path"]
 
         predictor = Prediction()
-        result = predictor.GenerateResult(csv_path)
+        result = predictor.generate_result(csv_path)
 
         # Convert bandpower DF to JSON
         result["EEGBandPowerFeatures"] = (

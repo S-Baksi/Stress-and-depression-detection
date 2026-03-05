@@ -44,37 +44,36 @@ function HomePage() {
             <div className="space-y-5">
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ color: 'var(--indigo-600)', background: 'var(--indigo-50)', border: '1px solid var(--indigo-100)' }}>
                 <Zap size={12} />
-                AI-Powered EEG Analysis
+                AI-Powered Fatigue Detection
               </span>
 
               <h1 className="text-4xl md:text-5xl font-extrabold leading-[1.12] tracking-tight" style={{ color: 'var(--text-heading)' }}>
-                Advanced Fatigue{" "}
-                <span style={{ color: 'var(--indigo-600)' }}>Detection System</span>
+                Advanced Mental{" "}
+                <span style={{ color: 'var(--indigo-600)' }}>Fatigue Detection</span>
               </h1>
 
               <p className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--text-body)' }}>
-                Harness machine learning to analyze EEG brainwave patterns across{" "}
-                <strong style={{ color: 'var(--text-heading)' }}>4 channels</strong> and{" "}
-                <strong style={{ color: 'var(--text-heading)' }}>5 frequency bands</strong> for precise, real-time fatigue assessment.
+                Comprehensive fatigue monitoring using <strong style={{ color: 'var(--text-heading)' }}>EEG brainwave analysis</strong> and{" "}
+                <strong style={{ color: 'var(--text-heading)' }}>real-time computer vision</strong>. Professional-grade detection powered by machine learning.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <Link to="/analysis" className="btn-primary">
-                  <Upload size={17} />
-                  Start Analysis
+                  <Brain size={17} />
+                  EEG Analysis
                   <ArrowRight size={15} />
                 </Link>
-                <a href="#how-it-works" className="btn-secondary">
-                  Learn More
-                  <TrendingUp size={15} />
-                </a>
+                <Link to="/driver-monitoring" className="btn-secondary">
+                  <Activity size={17} />
+                  Driver Monitoring
+                </Link>
               </div>
 
               <div className="flex gap-10 pt-3" style={{ borderTop: '1px solid var(--border-default)', marginTop: '0.5rem', paddingTop: '1rem' }}>
                 {[
-                  { value: "4", label: "EEG Channels" },
-                  { value: "5", label: "Wave Bands" },
-                  { value: "95%+", label: "Accuracy" }
+                  { value: "2", label: "Detection Methods" },
+                  { value: "AI", label: "Powered" },
+                  { value: "Free", label: "To Use" }
                 ].map((s) => (
                   <div key={s.label}>
                     <div className="text-xl font-bold" style={{ color: 'var(--indigo-600)' }}>{s.value}</div>
@@ -86,6 +85,101 @@ function HomePage() {
 
             <div className="flex justify-center">
               <img src={sentimentAnalysisImg} alt="EEG Analysis" className="w-full max-w-lg" />
+            </div>
+          </div>
+        </section>
+
+        {/* Detection Modules */}
+        <section className="py-14 px-8 md:px-12" style={{ backgroundColor: 'var(--bg-muted)' }}>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center" style={{ color: 'var(--text-heading)' }}>
+              Comprehensive Fatigue Detection
+            </h2>
+            <p className="text-center mb-10 text-sm" style={{ color: 'var(--text-body)' }}>
+              Choose the detection method that fits your needs
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {/* EEG Analysis Card */}
+              <div className="card p-6 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl" style={{ backgroundColor: 'var(--indigo-50)' }}>
+                    <Brain size={24} style={{ color: 'var(--indigo-600)' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold" style={{ color: 'var(--text-heading)' }}>
+                      EEG Brainwave Analysis
+                    </h3>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Professional-grade fatigue detection</p>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--text-body)' }}>
+                  Upload EEG data from 4 channels to analyze brainwave patterns across 5 frequency bands. 
+                  Get detailed insights into mental fatigue levels with ML-powered classification.
+                </p>
+                <ul className="space-y-2 mb-5 text-sm" style={{ color: 'var(--text-body)' }}>
+                  {[
+                    "Multi-channel EEG analysis",
+                    "5 frequency band decomposition",
+                    "Fatigue probability scoring",
+                    "Visual trend reports"
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--emerald-500)' }}>
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/analysis" className="btn-primary w-full justify-center">
+                  Start EEG Analysis
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+
+              {/* Driver Monitoring Card */}
+              <div className="card p-6 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+                    <Activity size={24} style={{ color: 'var(--emerald-500)' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold" style={{ color: 'var(--text-heading)' }}>
+                      Driver Fatigue Monitoring
+                    </h3>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Real-time computer vision detection</p>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--text-body)' }}>
+                  Use your webcam for real-time drowsiness detection using facial landmarks and eye tracking. 
+                  Perfect for drivers, night shift workers, and long-hour professionals.
+                </p>
+                <ul className="space-y-2 mb-5 text-sm" style={{ color: 'var(--text-body)' }}>
+                  {[
+                    "Real-time face detection",
+                    "Eye closure monitoring",
+                    "Instant drowsiness alerts",
+                    "Session analytics dashboard"
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--emerald-500)' }}>
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/driver-monitoring" className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold rounded-lg transition-all"
+                  style={{ 
+                    color: 'white',
+                    backgroundColor: 'var(--emerald-500)',
+                    border: 'none'
+                  }}>
+                  Start Monitoring
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
             </div>
           </div>
         </section>

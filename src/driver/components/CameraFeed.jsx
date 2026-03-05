@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
 import Dashboard from "./Dashboard";
-import "../styles.css";
+import { Link } from "react-router-dom";
+import { Video, VideoOff, BarChart3 } from "lucide-react";
+
+const WEBSOCKET_URL = "ws://localhost:8000/ws";
 
 const CameraFeed = () => {
   const videoRef = useRef(null);
@@ -12,6 +15,8 @@ const CameraFeed = () => {
 
   const [status, setStatus] = useState("NORMAL");
   const [score, setScore] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
+  const [cameraActive, setCameraActive] = useState(false);
   const [history, setHistory] = useState(() => {
     const saved = localStorage.getItem("fatigueHistory");
     return saved ? JSON.parse(saved) : [];
@@ -31,7 +36,7 @@ const CameraFeed = () => {
     ========================== */
     alarmRef.current = new Audio("/alarm.wav");
     alarmRef.current.preload = "auto";
-    alarmRef.current.volume = 1.0;
+    alarmRef.current.volume = 1;
 
     // Unlock audio on first click
     const unlockAudio = () => {
@@ -58,9 +63,11 @@ const CameraFeed = () => {
 
         if (videoElement) {
           videoElement.srcObject = stream;
+          setCameraActive(true);
         }
       } catch (err) {
         console.error("Camera error:", err);
+        setCameraActive(false);
       }
     };
 
@@ -69,11 +76,12 @@ const CameraFeed = () => {
     /* ==========================
        CONNECT WEBSOCKET
     ========================== */
-    const socket = new WebSocket("ws://localhost:8000/ws");
+    const socket = new WebSocket(WEBSOCKET_URL);
     socketRef.current = socket;
 
     socket.onopen = () => {
       console.log("WebSocket Connected");
+      setIsConnected(true);
 
       intervalRef.current = setInterval(() => {
         if (
@@ -148,10 +156,12 @@ const CameraFeed = () => {
 
     socket.onerror = (err) => {
       console.warn("WebSocket error:", err);
+      setIsConnected(false);
     };
 
     socket.onclose = () => {
       console.log("WebSocket Closed");
+      setIsConnected(false);
     };
 
     /* ==========================
@@ -182,30 +192,79 @@ const CameraFeed = () => {
   }, []);
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h2>Driver Fatigue Monitoring</h2>
+    <div className="space-y-6">
+      {/* Status Bar */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {cameraActive ? (
+              <Video size={18} style={{ color: 'var(--emerald-500)' }} />
+            ) : (
+              <VideoOff size={18} style={{ color: 'var(--rose-500)' }} />
+            )}
+            <span className="text-sm font-medium" style={{ color: 'var(--text-body)' }}>
+              Camera: {cameraActive ? "Active" : "Inactive"}
+            </span>
+          </div>
 
-        <button
-          className="analytics-btn"
-          onClick={() => (window.location.href = "/driver-analytics")}
+          <div className="w-px h-5" style={{ backgroundColor: 'var(--border-default)' }} />
+
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-2 h-2 rounded-full"
+              style={{ 
+                backgroundColor: isConnected ? 'var(--emerald-500)' : 'var(--rose-500)',
+                boxShadow: isConnected ? '0 0 8px rgba(16, 185, 129, 0.5)' : 'none'
+              }}
+            />
+            <span className="text-sm font-medium" style={{ color: 'var(--text-body)' }}>
+              Server: {isConnected ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+        </div>
+
+        <Link 
+          to="/driver-analytics" 
+          className="btn-secondary inline-flex items-center gap-2"
         >
-          View Analytics →
-        </button>
-      </header>
+          <BarChart3 size={16} />
+          View Analytics
+        </Link>
+      </div>
 
-      <div className="layout-grid">
-        <div className="camera-card">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="video-feed"
-          />
+      {/* Main Grid */}
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
+        {/* Camera Feed Card */}
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-heading)' }}>
+            Live Camera Feed
+          </h3>
+          <div 
+            className="relative rounded-lg overflow-hidden"
+            style={{ 
+              backgroundColor: 'var(--slate-900)',
+              aspectRatio: '4 / 3'
+            }}
+          >
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+            {!cameraActive && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: 'var(--slate-900)' }}>
+                <VideoOff size={48} style={{ color: 'var(--slate-400)', marginBottom: '12px' }} />
+                <p className="text-sm" style={{ color: 'var(--slate-400)' }}>Camera not available</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--slate-500)' }}>Please allow camera access</p>
+              </div>
+            )}
+          </div>
           <canvas ref={canvasRef} style={{ display: "none" }} />
         </div>
 
+        {/* Dashboard */}
         <Dashboard
           status={status}
           score={score}

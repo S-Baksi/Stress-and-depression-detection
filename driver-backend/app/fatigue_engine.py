@@ -7,7 +7,11 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.tasks.python.vision.core import image as mp_image_module
 
-from .config import *
+from .config import (
+    EYE_AR_CONSEC_FRAMES,
+    PERCLOS_WINDOW,
+    DROWSY_CONFIRM_FRAMES
+)
 
 
 class FatigueEngine:

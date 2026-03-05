@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Clock } from "lucide-react";
 
 const SessionTimer = () => {
   const [seconds, setSeconds] = useState(0);
@@ -15,13 +16,21 @@ const SessionTimer = () => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${hrs}h ${mins}m ${secs}s`;
+    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   return (
-    <div className="card">
-      <h3>Session Duration</h3>
-      <h2>{formatTime()}</h2>
+    <div className="flex flex-col items-center">
+      <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-muted)' }}>
+        Session Time
+      </h3>
+      <div className="flex items-center gap-2">
+        <Clock size={20} style={{ color: 'var(--indigo-600)' }} />
+        <p className="text-2xl font-bold" style={{ color: 'var(--text-heading)' }}>
+          {formatTime()}
+        </p>
+      </div>
+      <p className="text-xs mt-2" style={{ color: 'var(--text-body)' }}>Active monitoring</p>
     </div>
   );
 };

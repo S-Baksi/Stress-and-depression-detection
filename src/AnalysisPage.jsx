@@ -251,7 +251,16 @@ function AnalysisPage() {
           </div>
 
           {/* Results */}
-          {results && (
+          {results && (() => {
+            // Determine fatigue level color
+            let fatigueLevelColor = '#10b981'; // default green
+            if (results.fatigue_level === "High") {
+              fatigueLevelColor = '#f43f5e';
+            } else if (results.fatigue_level === "Moderate") {
+              fatigueLevelColor = '#f59e0b';
+            }
+
+            return (
             <div className="space-y-4">
               {/* Summary */}
               <div className="card p-5">
@@ -263,10 +272,7 @@ function AnalysisPage() {
                 <div className="grid md:grid-cols-3 gap-3 items-center">
                   <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-muted)', border: '1px solid var(--border-default)' }}>
                     <p className="text-[11px] font-medium mb-1 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Fatigue Level</p>
-                    <p className="text-2xl font-bold" style={{
-                      color: results.fatigue_level === "High" ? '#f43f5e' : 
-                             results.fatigue_level === "Moderate" ? '#f59e0b' : '#10b981'
-                    }}>
+                    <p className="text-2xl font-bold" style={{ color: fatigueLevelColor }}>
                       {results.fatigue_level}
                     </p>
                   </div>
@@ -355,7 +361,8 @@ function AnalysisPage() {
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
         </section>
       </div>
 
