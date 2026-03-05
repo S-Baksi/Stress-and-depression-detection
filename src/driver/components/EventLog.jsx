@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { AlertTriangle } from "lucide-react";
 
 const EventLog = ({ events = [] }) => {
@@ -33,6 +34,15 @@ const EventLog = ({ events = [] }) => {
       ))}
     </div>
   );
+};
+
+EventLog.propTypes = {
+  events: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.string.isRequired,
+      message: PropTypes.string.isRequired
+    })
+  )
 };
 
 export default EventLog;

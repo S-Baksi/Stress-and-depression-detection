@@ -1,6 +1,7 @@
 import React from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import PropTypes from "prop-types";
 
 const FatigueGauge = ({ score }) => {
   const getColor = () => {
@@ -29,6 +30,10 @@ const FatigueGauge = ({ score }) => {
       <p className="text-xs mt-2" style={{ color: 'var(--text-body)' }}>Out of 100</p>
     </div>
   );
+};
+
+FatigueGauge.propTypes = {
+  score: PropTypes.number.isRequired
 };
 
 export default FatigueGauge;

@@ -45,6 +45,61 @@ class FatigueEngine:
         C = dist.euclidean(eye[0], eye[3])
         return (A + B) / (2.0 * C)
 
+    def update_blink_detection(self, eye_closed):
+        """Update blink detection and return blink rate."""
+        current_time = time.time()
+        if self.prev_eye_closed and not eye_closed:
+            self.blink_times.append(current_time)
+        self.prev_eye_closed = eye_closed
+
+        # Remove old blink times outside 60s window
+        while self.blink_times and current_time - self.blink_times[0] > 60:
+            self.blink_times.popleft()
+
+        return len(self.blink_times)
+
+    def calculate_perclos(self, eye_closed):
+        """Calculate PERCLOS (percentage of eye closure)."""
+        self.perclos_window.append(1 if eye_closed else 0)
+        return (sum(self.perclos_window) / len(self.perclos_window)) * 100
+
+    def calculate_fatigue_score(self, perclos, blink_rate, eye_closed):
+        """Calculate fatigue score based on multiple metrics."""
+        # Eye Closure Counter
+        if eye_closed:
+            self.COUNTER += 1
+        else:
+            self.COUNTER = 0
+
+        # Fatigue Score Fusion
+        fatigue_score = min(perclos, 40)
+
+        if blink_rate < 8:
+            fatigue_score += 20
+        elif blink_rate < 12:
+            fatigue_score += 10
+
+        if self.COUNTER >= EYE_AR_CONSEC_FRAMES:
+            fatigue_score += 20
+
+        return min(fatigue_score, 100)
+
+    def classify_status(self, fatigue_score):
+        """Classify fatigue status based on smoothed score."""
+        self.smoothed_fatigue = 0.8 * self.smoothed_fatigue + 0.2 * fatigue_score
+
+        if self.smoothed_fatigue < 30:
+            self.drowsy_counter = 0
+            return "NORMAL"
+        if self.smoothed_fatigue < 60:
+            self.drowsy_counter = 0
+            return "TIRED"
+        
+        self.drowsy_counter += 1
+        if self.drowsy_counter >= DROWSY_CONFIRM_FRAMES:
+            return "DROWSY"
+        return "TIRED"
+
     def process_frame(self, frame):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -70,57 +125,17 @@ class FatigueEngine:
 
             eye_closed = ear < self.EYE_AR_THRESH
 
-            # Blink Detection
-            current_time = time.time()
-            if self.prev_eye_closed and not eye_closed:
-                self.blink_times.append(current_time)
-            self.prev_eye_closed = eye_closed
+            # Update blink detection
+            blink_rate = self.update_blink_detection(eye_closed)
 
-            while self.blink_times and current_time - self.blink_times[0] > 60:
-                self.blink_times.popleft()
+            # Calculate PERCLOS
+            perclos = self.calculate_perclos(eye_closed)
 
-            blink_rate = len(self.blink_times)
+            # Calculate fatigue score
+            fatigue_score = self.calculate_fatigue_score(perclos, blink_rate, eye_closed)
 
-            # PERCLOS
-            self.perclos_window.append(1 if eye_closed else 0)
-            perclos = (sum(self.perclos_window) / len(self.perclos_window)) * 100
-
-            # Eye Closure Counter
-            if eye_closed:
-                self.COUNTER += 1
-            else:
-                self.COUNTER = 0
-
-            # Fatigue Score Fusion
-            fatigue_score = 0
-            fatigue_score += min(perclos, 40)
-
-            if blink_rate < 8:
-                fatigue_score += 20
-            elif blink_rate < 12:
-                fatigue_score += 10
-
-            if self.COUNTER >= EYE_AR_CONSEC_FRAMES:
-                fatigue_score += 20
-
-            fatigue_score = min(fatigue_score, 100)
-
-            # Smooth
-            self.smoothed_fatigue = 0.8 * self.smoothed_fatigue + 0.2 * fatigue_score
-
-            # Classification
-            if self.smoothed_fatigue < 30:
-                status = "NORMAL"
-                self.drowsy_counter = 0
-            elif self.smoothed_fatigue < 60:
-                status = "TIRED"
-                self.drowsy_counter = 0
-            else:
-                self.drowsy_counter += 1
-                if self.drowsy_counter >= DROWSY_CONFIRM_FRAMES:
-                    status = "DROWSY"
-                else:
-                    status = "TIRED"
+            # Classify status
+            status = self.classify_status(fatigue_score)
 
         return {
             "status": status,

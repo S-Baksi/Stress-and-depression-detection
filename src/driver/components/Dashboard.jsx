@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import FatigueGauge from "./FatigueGauge";
 import FatigueChart from "./FatigueChart";
 import SessionTimer from "./SessionTimer";
@@ -31,6 +32,17 @@ const Dashboard = ({ status, score, history }) => {
       </div>
     </div>
   );
+};
+
+Dashboard.propTypes = {
+  status: PropTypes.string.isRequired,
+  score: PropTypes.number.isRequired,
+  history: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.string,
+      score: PropTypes.number
+    })
+  ).isRequired
 };
 
 export default Dashboard;

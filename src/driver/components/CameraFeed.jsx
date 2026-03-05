@@ -11,7 +11,9 @@ const CameraFeed = () => {
   const socketRef = useRef(null);
   const intervalRef = useRef(null);
   const alarmRef = useRef(null);
+  const audioContextRef = useRef(null);
   const alertCooldownRef = useRef(0);
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
   const [status, setStatus] = useState("NORMAL");
   const [score, setScore] = useState(0);
@@ -32,25 +34,94 @@ const CameraFeed = () => {
     const videoElement = videoRef.current;
 
     /* ==========================
-       PREPARE ALARM
+       PREPARE ALARM - Using Web Audio API for reliability
     ========================== */
-    alarmRef.current = new Audio("/alarm.wav");
-    alarmRef.current.preload = "auto";
-    alarmRef.current.volume = 1;
-
-    // Unlock audio on first click
-    const unlockAudio = () => {
-      alarmRef.current
-        .play()
-        .then(() => {
-          alarmRef.current.pause();
-          alarmRef.current.currentTime = 0;
-        })
-        .catch(() => {});
-      window.removeEventListener("click", unlockAudio);
+    const initAudio = () => {
+      try {
+        // Create Audio Context
+        audioContextRef.current = new (globalThis.AudioContext || globalThis.webkitAudioContext)();
+        
+        // Try to create a simple audio element as fallback
+        alarmRef.current = new Audio();
+        alarmRef.current.src = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjGM0fPTgjMGHm7A7+OZRQ0PVKrk6q5WFAhCmN7yu2EbBi6Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNUEwxEmN7zumEcBi+Gxu/ajywGKHe/7+WXPwsQVqzm7LNU=";
+        alarmRef.current.preload = "auto";
+        alarmRef.current.volume = 1;
+        
+        setAudioEnabled(true);
+      } catch (err) {
+        console.error("Audio initialization failed:", err);
+      }
     };
 
-    window.addEventListener("click", unlockAudio);
+    // Initialize audio on first user interaction
+    const enableAudio = () => {
+      if (!audioEnabled) {
+        initAudio();
+        // Try to resume AudioContext
+        if (audioContextRef.current?.state === 'suspended') {
+          audioContextRef.current.resume();
+        }
+        document.removeEventListener("click", enableAudio);
+        document.removeEventListener("touchstart", enableAudio);
+      }
+    };
+
+    document.addEventListener("click", enableAudio);
+    document.addEventListener("touchstart", enableAudio);
+
+    // Play alarm using Web Audio API - extracted to reduce nesting
+    const playAlarmSound = () => {
+      try {
+        // Method 1: Use Web Audio API beep
+        if (audioContextRef.current?.state !== 'closed') {
+          const ctx = audioContextRef.current;
+          
+          // Create oscillator for beep sound
+          const oscillator = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          
+          // Configure sound (urgent beep)
+          oscillator.frequency.value = 800; // Hz
+          oscillator.type = 'sine';
+          
+          // Volume envelope
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.01);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          
+          oscillator.start(ctx.currentTime);
+          oscillator.stop(ctx.currentTime + 0.5);
+          
+          // Play second beep
+          setTimeout(() => {
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.frequency.value = 1000;
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(0, ctx.currentTime);
+            gain2.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.01);
+            gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+            osc2.start(ctx.currentTime);
+            osc2.stop(ctx.currentTime + 0.5);
+          }, 200);
+        }
+        
+        // Method 2: Fallback to Audio element
+        if (alarmRef.current) {
+          alarmRef.current.currentTime = 0;
+          alarmRef.current.play().catch((err) => {
+            console.warn("Audio playback failed:", err);
+          });
+        }
+      } catch (err) {
+        console.error("Alarm playback error:", err);
+      }
+    };
 
     /* ==========================
        START CAMERA
@@ -115,7 +186,11 @@ const CameraFeed = () => {
 
       // Save score history
       setHistory((prev) => {
-        const updated = [...prev, newScore].slice(-50);
+        const updated = [
+          ...prev,
+          { time: new Date().toLocaleTimeString(), score: newScore }
+        ].slice(-50);
+
         localStorage.setItem("fatigueHistory", JSON.stringify(updated));
         return updated;
       });
@@ -131,10 +206,7 @@ const CameraFeed = () => {
           alertCooldownRef.current = now;
 
           // Play alarm
-          if (alarmRef.current) {
-            alarmRef.current.currentTime = 0;
-            alarmRef.current.play().catch(() => {});
-          }
+          playAlarmSound();
 
           // Save detection event
           const newEvent = {
@@ -183,13 +255,22 @@ const CameraFeed = () => {
         }
       }
 
-      if (videoElement && videoElement.srcObject) {
+      if (videoElement?.srcObject) {
         videoElement.srcObject
           .getTracks()
           .forEach((track) => track.stop());
       }
+      
+      // Close audio context
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+      
+      // Remove event listeners
+      document.removeEventListener("click", enableAudio);
+      document.removeEventListener("touchstart", enableAudio);
     };
-  }, []);
+  }, [audioEnabled]);
 
   return (
     <div className="space-y-6">
@@ -219,6 +300,21 @@ const CameraFeed = () => {
             />
             <span className="text-sm font-medium" style={{ color: 'var(--text-body)' }}>
               Server: {isConnected ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+
+          <div className="w-px h-5" style={{ backgroundColor: 'var(--border-default)' }} />
+
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-2 h-2 rounded-full"
+              style={{ 
+                backgroundColor: audioEnabled ? 'var(--emerald-500)' : 'var(--amber-500)',
+                boxShadow: audioEnabled ? '0 0 8px rgba(16, 185, 129, 0.5)' : 'none'
+              }}
+            />
+            <span className="text-sm font-medium" style={{ color: 'var(--text-body)' }}>
+              Audio: {audioEnabled ? "Ready" : "Click to enable"}
             </span>
           </div>
         </div>

@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "lucide-react": "^0.561.0",
     "papaparse": "^5.5.3",
+    "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.2.0",

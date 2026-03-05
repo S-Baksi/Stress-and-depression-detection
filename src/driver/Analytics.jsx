@@ -37,12 +37,14 @@ const Analytics = () => {
   const averageScore =
     history.length > 0
       ? (
-          history.reduce((a, b) => a + b, 0) / history.length
+          history.reduce((sum, item) => sum + (typeof item === 'number' ? item : item.score), 0) / history.length
         ).toFixed(1)
       : 0;
 
   const maxScore =
-    history.length > 0 ? Math.max(...history) : 0;
+    history.length > 0 
+      ? Math.max(...history.map(item => typeof item === 'number' ? item : item.score)).toFixed(1)
+      : 0;
 
   const drowsyCount = events.length;
 

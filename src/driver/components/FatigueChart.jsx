@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import {
   LineChart,
   Line,
@@ -24,9 +25,9 @@ const FatigueChart = ({ history = [] }) => {
     );
   }
 
-  const data = history.map((value, index) => ({
+  const data = history.map((item, index) => ({
     time: index + 1,
-    score: value
+    score: typeof item === 'number' ? item : item.score
   }));
 
   return (
@@ -72,6 +73,10 @@ const FatigueChart = ({ history = [] }) => {
       </ResponsiveContainer>
     </div>
   );
+};
+
+FatigueChart.propTypes = {
+  history: PropTypes.array
 };
 
 export default FatigueChart;

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Activity, AlertTriangle, CheckCircle } from "lucide-react";
 
 const StatusCard = ({ status }) => {
@@ -68,6 +69,10 @@ const StatusCard = ({ status }) => {
       </p>
     </div>
   );
+};
+
+StatusCard.propTypes = {
+  status: PropTypes.string.isRequired
 };
 
 export default StatusCard;

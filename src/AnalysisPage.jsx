@@ -48,6 +48,15 @@ const BAND_TEXT = {
   gamma: "#e11d48"
 };
 
+// Helper function to calculate band statistics
+const calculateBandStats = (channelData, band) => {
+  const values = channelData.map(d => d[band]);
+  const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+  const max = Math.max(...values).toFixed(2);
+  const min = Math.min(...values).toFixed(2);
+  return { avg, max, min };
+};
+
 const processChannelData = (bandpowerFeatures, channels) => {
   const channelData = {};
   channels.forEach(channel => {
@@ -321,10 +330,7 @@ function AnalysisPage() {
 
                   <div className="mt-3 grid grid-cols-5 gap-2">
                     {["delta", "theta", "alpha", "beta", "gamma"].map((band) => {
-                      const values = results.channels[channel].map(d => d[band]);
-                      const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
-                      const max = Math.max(...values).toFixed(2);
-                      const min = Math.min(...values).toFixed(2);
+                      const { avg, max, min } = calculateBandStats(results.channels[channel], band);
 
                       return (
                         <div key={band} className="rounded-lg p-2.5" style={{ backgroundColor: BAND_BG[band] }}>
