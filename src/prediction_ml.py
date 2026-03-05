@@ -126,7 +126,7 @@ class Prediction:
         
         df_features = self.aggregate_period_features(df_bandpower)
         #df_features.to_csv('EEGFeatures_Testing.csv')
-        with open("S:/final year/final_webapp/Stress-and-depression-detection/src/rf_pred.pkl", "rb") as f:
+        with open("C:\\Users\\ASUS\\OneDrive\\Desktop\\projects\\Stress-and-depression-detection\\src\\rf_pred.pkl", "rb") as f:
             loaded_artifact = pickle.load(f)
 
         rf_loaded = loaded_artifact["model"]
