@@ -1,6 +1,6 @@
 import { ArrowLeft, Brain } from 'lucide-react'
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 
 const Header = () => {
   const location = useLocation();
@@ -21,6 +21,45 @@ const Header = () => {
             <p className="text-[11px] leading-none" style={{ color: 'var(--text-muted)' }}>AI Fatigue Detection</p>
           </div>
         </Link>
+
+        <nav className="flex items-center gap-4 text-sm">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `transition-colors ${isActive ? 'font-semibold' : ''}`
+            }
+            style={{ color: 'var(--text-body)' }}
+          >
+            EEG Home
+          </NavLink>
+          <NavLink
+            to="/analysis"
+            className={({ isActive }) =>
+              `transition-colors ${isActive ? 'font-semibold' : ''}`
+            }
+            style={{ color: 'var(--text-body)' }}
+          >
+            EEG Analysis
+          </NavLink>
+          <NavLink
+            to="/driver-monitoring"
+            className={({ isActive }) =>
+              `transition-colors ${isActive ? 'font-semibold' : ''}`
+            }
+            style={{ color: 'var(--text-body)' }}
+          >
+            Driver Monitoring
+          </NavLink>
+          <NavLink
+            to="/driver-analytics"
+            className={({ isActive }) =>
+              `transition-colors ${isActive ? 'font-semibold' : ''}`
+            }
+            style={{ color: 'var(--text-body)' }}
+          >
+            Driver Analytics
+          </NavLink>
+        </nav>
 
         {!isHome && (
           <Link
