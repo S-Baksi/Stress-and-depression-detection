@@ -22,7 +22,7 @@ const loadingMessages = [
   "Finalizing results..."
 ];
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "http://localhost:9000"; // Update if your backend runs on a different port
 
 const CHART_COLORS = {
   delta: "#6366f1",

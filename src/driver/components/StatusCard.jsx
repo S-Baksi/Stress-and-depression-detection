@@ -53,7 +53,7 @@ const StatusCard = ({ status }) => {
   return (
     <div className="flex flex-col items-center">
       <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-muted)' }}>
-        Driver Status
+        Condition
       </h3>
       <div 
         className="flex items-center justify-center w-16 h-16 rounded-full mb-2"
