@@ -18,7 +18,7 @@ const Header = () => {
           </div>
           <div>
             <h1 className="text-lg font-bold leading-tight" style={{ color: 'var(--text-heading)' }}>Cognivue</h1>
-            <p className="text-[11px] leading-none" style={{ color: 'var(--text-muted)' }}>AI Fatigue Detection</p>
+            <p className="text-[11px] leading-none" style={{ color: 'var(--text-muted)' }}>AI Fatigue & Stress Detection</p>
           </div>
         </Link>
 
@@ -40,6 +40,15 @@ const Header = () => {
             style={{ color: 'var(--text-body)' }}
           >
             EEG Analysis
+          </NavLink>
+          <NavLink
+            to="/stress-prediction"
+            className={({ isActive }) =>
+              `transition-colors ${isActive ? 'font-semibold' : ''}`
+            }
+            style={{ color: 'var(--text-body)' }}
+          >
+            Stress Prediction
           </NavLink>
           <NavLink
             to="/driver-monitoring"
