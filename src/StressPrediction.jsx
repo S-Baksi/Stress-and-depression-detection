@@ -418,32 +418,79 @@ function StressPrediction() {
 
             <div className="hidden md:flex items-center justify-center">
               <div
-                className="card p-6 w-full max-w-sm"
-                style={{ textAlign: "left" }}
+                className="card p-7 w-full max-w-sm"
+                style={{ 
+                  textAlign: "left",
+                  background: "linear-gradient(135deg, var(--bg-card) 0%, var(--bg-muted) 100%)",
+                  border: "2px solid var(--border-default)",
+                }}
               >
-                <h3
-                  className="text-base font-semibold mb-1.5"
-                  style={{ color: "var(--text-heading)" }}
-                >
-                  What this tool does
-                </h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <div 
+                    className="p-2 rounded-lg"
+                    style={{ 
+                      backgroundColor: "var(--accent-hover)",
+                      color: "var(--accent)"
+                    }}
+                  >
+                    <Activity size={20} />
+                  </div>
+                  <h3
+                    className="text-lg font-bold"
+                    style={{ color: "var(--text-heading)" }}
+                  >
+                    How It Works
+                  </h3>
+                </div>
+                
                 <p
-                  className="text-sm mb-3"
+                  className="text-sm mb-4 leading-relaxed"
                   style={{ color: "var(--text-body)" }}
                 >
-                  This interface connects directly to your{" "}
-                  <code>stress_xgb_model.pkl</code> backend. It keeps you on the
-                  same page and only refreshes the prediction widget when you
-                  submit new values.
+                  Powered by <strong>XGBoost ML</strong>, this tool analyzes your health and lifestyle data to predict stress risk in real-time.
                 </p>
-                <ul className="text-xs space-y-1.5" style={{ color: "var(--text-body)" }}>
-                  <li>• Numeric health metrics are passed as-is.</li>
-                  <li>• Bed/Wake times are converted to minutes from midnight.</li>
-                  <li>
-                    • Lifestyle questions (alcohol, caffeine) are mapped from
-                    Yes/No to 1/0.
-                  </li>
-                </ul>
+
+                <div 
+                  className="rounded-lg p-4 mb-4"
+                  style={{ 
+                    backgroundColor: "var(--bg-card)",
+                    border: "1px solid var(--border-default)",
+                  }}
+                >
+                  <h4 
+                    className="text-xs font-semibold mb-3 uppercase tracking-wider"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Data Processing
+                  </h4>
+                  <ul className="space-y-2.5" style={{ color: "var(--text-body)" }}>
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle size={16} style={{ color: "#10b981", marginTop: "2px", flexShrink: 0 }} />
+                      <span>Health metrics sent as numerical values</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle size={16} style={{ color: "#10b981", marginTop: "2px", flexShrink: 0 }} />
+                      <span>Sleep times converted to minutes from midnight</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <CheckCircle size={16} style={{ color: "#10b981", marginTop: "2px", flexShrink: 0 }} />
+                      <span>Lifestyle choices encoded as binary (1/0)</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div 
+                  className="flex items-center gap-2 p-3 rounded-lg"
+                  style={{ 
+                    backgroundColor: "rgba(99, 102, 241, 0.1)",
+                    border: "1px solid rgba(99, 102, 241, 0.2)",
+                  }}
+                >
+                  <AlertTriangle size={14} style={{ color: "#6366f1", flexShrink: 0 }} />
+                  <p className="text-xs" style={{ color: "var(--text-body)" }}>
+                    Predictions update only when you submit new data
+                  </p>
+                </div>
               </div>
             </div>
           </div>

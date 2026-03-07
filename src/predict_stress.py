@@ -19,7 +19,7 @@ CORS(app)
 # =========================
 # Load Model
 # =========================
-with open("stress_xgb_model.pkl", "rb") as f:
+with open("C:/Users/ASUS/OneDrive/Desktop/projects/Stress-and-depression-detection/src/stress_xgb_model.pkl", "rb") as f:
     artifact = pickle.load(f)
 
 model = artifact["model"]
