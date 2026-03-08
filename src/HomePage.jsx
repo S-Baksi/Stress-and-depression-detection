@@ -73,14 +73,14 @@ function HomePage() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: 'var(--text-heading)' }}>
-                Two Powerful Detection Methods
+                Three Powerful Detection Methods
               </h2>
               <p className="text-lg" style={{ color: 'var(--text-body)' }}>
-                Choose the approach that fits your needs — or use both for complete coverage
+                Choose the approach that fits your needs — or use all three for complete coverage
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-3 gap-8">
               {/* EEG Analysis */}
               <div className="card p-8 hover:shadow-xl transition-shadow">
                 <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ backgroundColor: 'var(--indigo-50)' }}>
@@ -154,6 +154,48 @@ function HomePage() {
                   }}
                 >
                   Start Monitoring
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+
+              {/* Stress Detection */}
+              <div className="card p-8 hover:shadow-xl transition-shadow">
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ backgroundColor: 'rgba(251, 146, 60, 0.1)' }}>
+                  <Zap size={28} style={{ color: 'var(--orange-500)' }} />
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-heading)' }}>
+                  Stress Level Analysis
+                </h3>
+                
+                <p className="text-base leading-relaxed mb-6" style={{ color: 'var(--text-body)' }}>
+                  Predict stress and depression levels through behavioral pattern analysis. 
+                  Early detection for better mental health management and intervention.
+                </p>
+
+                <div className="space-y-3 mb-6">
+                  {[
+                    "Behavioral pattern analysis",
+                    "Multi-factor assessment",
+                    "Depression risk scoring",
+                    "Preventive insights"
+                  ].map((feature) => (
+                    <div key={feature} className="flex items-center gap-3">
+                      <CheckCircle size={18} style={{ color: 'var(--emerald-500)' }} />
+                      <span className="text-sm" style={{ color: 'var(--text-body)' }}>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Link 
+                  to="/stress-prediction" 
+                  className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 text-sm font-semibold rounded-lg transition-all"
+                  style={{ 
+                    color: 'white',
+                    backgroundColor: '#f97316'
+                  }}
+                >
+                  Check Stress Level
                   <ArrowRight size={16} />
                 </Link>
               </div>
