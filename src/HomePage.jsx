@@ -211,11 +211,11 @@ function HomePage() {
                 How It Works
               </h2>
               <p className="text-lg" style={{ color: 'var(--text-body)' }}>
-                Advanced AI algorithms analyze multiple fatigue indicators
+                Advanced AI algorithms analyze multiple indicators for comprehensive detection
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
               {/* EEG Process */}
               <div className="card p-6">
                 <div className="flex items-center gap-3 mb-6">
@@ -267,6 +267,37 @@ function HomePage() {
                   ].map((step) => (
                     <div key={step.num} className="flex gap-4">
                       <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--emerald-600)' }}>
+                        {step.num}
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-heading)' }}>{step.title}</h4>
+                        <p className="text-sm" style={{ color: 'var(--text-body)' }}>{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stress Detection Process */}
+              <div className="card p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(251, 146, 60, 0.1)' }}>
+                    <Zap size={20} style={{ color: '#f97316' }} />
+                  </div>
+                  <h3 className="text-xl font-bold" style={{ color: 'var(--text-heading)' }}>
+                    Stress Analysis Pipeline
+                  </h3>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { num: "01", title: "Data Input", desc: "Enter behavioral and physiological parameters" },
+                    { num: "02", title: "Feature Extraction", desc: "Process multi-dimensional stress indicators" },
+                    { num: "03", title: "ML Classification", desc: "Predict stress and depression levels" },
+                    { num: "04", title: "Risk Assessment", desc: "Generate detailed mental health insights" }
+                  ].map((step) => (
+                    <div key={step.num} className="flex gap-4">
+                      <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'rgba(251, 146, 60, 0.1)', color: '#f97316' }}>
                         {step.num}
                       </span>
                       <div>
