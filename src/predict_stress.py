@@ -31,15 +31,26 @@ explainer = shap.TreeExplainer(model)
 # =========================
 FEATURE_NAMES = [
     'Age',
-    'Blood_Sugar_Level',
+    'Gender',
+    'Occupation',
+    'Marital_Status',
+    'Sleep_Duration',
+    'Sleep_Quality',
+    'Wake_Up_Time',
+    'Bed_Time',
+    'Physical_Activity',
+    'Screen_Time',
+    'Caffeine_Intake',
+    'Alcohol_Intake',
+    'Smoking_Habit',
+    'Work_Hours',
+    'Travel_Time',
+    'Social_Interactions',
+    'Meditation_Practice',
+    'Exercise_Type',
     'Blood_Pressure',
     'Cholesterol_Level',
-    'Bed_Time_Numeric',
-    'Alcohol_Intake',
-    'Caffeine_Intake',
-    'Travel_Time',
-    'Wake_Up_Time_Numeric',
-    'Work_Hours'
+    'Blood_Sugar_Level'
 ]
 
 
