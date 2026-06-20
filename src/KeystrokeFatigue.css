@@ -1,0 +1,82 @@
+/* Keystroke Fatigue Styles */
+
+.keystroke-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.typing-area {
+  position: relative;
+}
+
+.typing-area textarea:focus {
+  outline: none;
+  border-color: var(--indigo-600);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.typing-area textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Character highlighting in sample text */
+.sample-text-char {
+  transition: color 0.1s ease;
+}
+
+/* Stats cards */
+.stat-card {
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Progress bar animation */
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.progress-bar-active {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Button animations */
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Results animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-card {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .typing-area textarea {
+    font-size: 0.875rem;
+  }
+
+  .sample-text {
+    font-size: 0.875rem;
+  }
+}
