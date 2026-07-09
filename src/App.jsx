@@ -5,17 +5,53 @@ import AnalysisPage from "./AnalysisPage";
 import Monitoring from "./driver/Monitoring";
 import DriverAnalytics from "./driver/Analytics";
 import StressPrediction from "./StressPrediction";
-import KeystrokeFatigue from "./KeystrokeFatigue";
+import LoginPage from "./LoginPage";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/analysis" element={<AnalysisPage />} />
-      <Route path="/stress-prediction" element={<StressPrediction />} />
-      <Route path="/driver-monitoring" element={<Monitoring />} />
-      <Route path="/driver-analytics" element={<DriverAnalytics />} />
-      <Route path="/keystroke-fatigue" element={<KeystrokeFatigue />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analysis"
+        element={
+          <ProtectedRoute>
+            <AnalysisPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/stress-prediction"
+        element={
+          <ProtectedRoute>
+            <StressPrediction />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver-monitoring"
+        element={
+          <ProtectedRoute>
+            <Monitoring />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/driver-analytics"
+        element={
+          <ProtectedRoute>
+            <DriverAnalytics />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

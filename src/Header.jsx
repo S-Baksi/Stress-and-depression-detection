@@ -49,9 +49,6 @@ const Header = () => {
             <NavLink to="/driver-analytics" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Driver Analytics
             </NavLink>
-            <NavLink to="/keystroke-fatigue" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Keystroke Analysis
-            </NavLink>
           </nav>
 
           {/* Desktop Actions */}
@@ -94,9 +91,6 @@ const Header = () => {
               </NavLink>
               <NavLink to="/driver-analytics" className={({ isActive }) => isActive ? 'mobile-link active' : 'mobile-link'} onClick={closeMobileMenu}>
                 Driver Analytics
-              </NavLink>
-              <NavLink to="/keystroke-fatigue" className={({ isActive }) => isActive ? 'mobile-link active' : 'mobile-link'} onClick={closeMobileMenu}>
-                Keystroke Analysis
               </NavLink>
             </div>
 

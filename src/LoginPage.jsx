@@ -45,7 +45,7 @@ export default function LoginPage() {
         // Redirect based on role
         if (role === 'manager') {
           // Redirect to manager dashboard
-          window.location.href = 'http://127.0.0.1:9095';
+          window.location.href = 'http://127.0.0.1:9023';
         } else {
           // Navigate to employee homepage
           navigate('/');

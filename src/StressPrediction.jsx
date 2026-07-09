@@ -69,7 +69,9 @@ function StressPrediction() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server returned ${response.status}`);
+        throw new Error(
+          errorData.error || `Server returned ${response.status}`,
+        );
       }
 
       const data = await response.json();
@@ -92,7 +94,7 @@ function StressPrediction() {
       console.error("Stress prediction error:", err);
       toast.error(
         err.message ||
-          "Failed to predict stress. Please ensure the stress API is running on port 9095."
+          "Failed to predict stress. Please ensure the stress API is running on port 9095.",
       );
     } finally {
       setIsPredicting(false);
@@ -181,7 +183,6 @@ function StressPrediction() {
                       }}
                     />
                   </div>
-
                   <div>
                     <label
                       htmlFor="blood-sugar"
@@ -409,8 +410,8 @@ function StressPrediction() {
                   className="text-[11px] mt-1"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  Yes/No answers are internally converted to numeric values
-                  (Yes = 1, No = 0) to match the model&apos;s boolean feature
+                  Yes/No answers are internally converted to numeric values (Yes
+                  = 1, No = 0) to match the model&apos;s boolean feature
                   encoding.
                 </p>
               </form>
@@ -419,18 +420,19 @@ function StressPrediction() {
             <div className="hidden md:flex items-center justify-center">
               <div
                 className="card p-7 w-full max-w-sm"
-                style={{ 
+                style={{
                   textAlign: "left",
-                  background: "linear-gradient(135deg, var(--bg-card) 0%, var(--bg-muted) 100%)",
+                  background:
+                    "linear-gradient(135deg, var(--bg-card) 0%, var(--bg-muted) 100%)",
                   border: "2px solid var(--border-default)",
                 }}
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <div 
+                  <div
                     className="p-2 rounded-lg"
-                    style={{ 
+                    style={{
                       backgroundColor: "var(--accent-hover)",
-                      color: "var(--accent)"
+                      color: "var(--accent)",
                     }}
                   >
                     <Activity size={20} />
@@ -442,51 +444,82 @@ function StressPrediction() {
                     How It Works
                   </h3>
                 </div>
-                
+
                 <p
                   className="text-sm mb-4 leading-relaxed"
                   style={{ color: "var(--text-body)" }}
                 >
-                  Powered by <strong>XGBoost ML</strong>, this tool analyzes your health and lifestyle data to predict stress risk in real-time.
+                  Powered by <strong>XGBoost ML</strong>, this tool analyzes
+                  your health and lifestyle data to predict stress risk in
+                  real-time.
                 </p>
 
-                <div 
+                <div
                   className="rounded-lg p-4 mb-4"
-                  style={{ 
+                  style={{
                     backgroundColor: "var(--bg-card)",
                     border: "1px solid var(--border-default)",
                   }}
                 >
-                  <h4 
+                  <h4
                     className="text-xs font-semibold mb-3 uppercase tracking-wider"
                     style={{ color: "var(--text-muted)" }}
                   >
                     Data Processing
                   </h4>
-                  <ul className="space-y-2.5" style={{ color: "var(--text-body)" }}>
+                  <ul
+                    className="space-y-2.5"
+                    style={{ color: "var(--text-body)" }}
+                  >
                     <li className="flex items-start gap-2 text-sm">
-                      <CheckCircle size={16} style={{ color: "#10b981", marginTop: "2px", flexShrink: 0 }} />
+                      <CheckCircle
+                        size={16}
+                        style={{
+                          color: "#10b981",
+                          marginTop: "2px",
+                          flexShrink: 0,
+                        }}
+                      />
                       <span>Health metrics sent as numerical values</span>
                     </li>
                     <li className="flex items-start gap-2 text-sm">
-                      <CheckCircle size={16} style={{ color: "#10b981", marginTop: "2px", flexShrink: 0 }} />
-                      <span>Sleep times converted to minutes from midnight</span>
+                      <CheckCircle
+                        size={16}
+                        style={{
+                          color: "#10b981",
+                          marginTop: "2px",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span>
+                        Sleep times converted to minutes from midnight
+                      </span>
                     </li>
                     <li className="flex items-start gap-2 text-sm">
-                      <CheckCircle size={16} style={{ color: "#10b981", marginTop: "2px", flexShrink: 0 }} />
+                      <CheckCircle
+                        size={16}
+                        style={{
+                          color: "#10b981",
+                          marginTop: "2px",
+                          flexShrink: 0,
+                        }}
+                      />
                       <span>Lifestyle choices encoded as binary (1/0)</span>
                     </li>
                   </ul>
                 </div>
 
-                <div 
+                <div
                   className="flex items-center gap-2 p-3 rounded-lg"
-                  style={{ 
+                  style={{
                     backgroundColor: "rgba(99, 102, 241, 0.1)",
                     border: "1px solid rgba(99, 102, 241, 0.2)",
                   }}
                 >
-                  <AlertTriangle size={14} style={{ color: "#6366f1", flexShrink: 0 }} />
+                  <AlertTriangle
+                    size={14}
+                    style={{ color: "#6366f1", flexShrink: 0 }}
+                  />
                   <p className="text-xs" style={{ color: "var(--text-body)" }}>
                     Predictions update only when you submit new data
                   </p>
@@ -568,7 +601,8 @@ function StressPrediction() {
                   >
                     Concerning Factors
                   </h3>
-                  {result.concerningFactors && result.concerningFactors.length > 0 ? (
+                  {result.concerningFactors &&
+                  result.concerningFactors.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {result.concerningFactors.map((factor) => (
                         <span
@@ -600,7 +634,8 @@ function StressPrediction() {
                   >
                     Protective Factors
                   </h3>
-                  {result.protectiveFactors && result.protectiveFactors.length > 0 ? (
+                  {result.protectiveFactors &&
+                  result.protectiveFactors.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {result.protectiveFactors.map((factor) => (
                         <span
