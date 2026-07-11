@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import time
+import ctypes
+import threading
 from collections import deque
 from scipy.spatial import distance as dist
 from mediapipe.tasks import python
@@ -13,6 +15,27 @@ from .config import (
     DROWSY_CONFIRM_FRAMES
 )
 
+# helper function to turn off the screen for a specified duration
+def turn_off_screen_for(duration=3):
+    """Turn off the Windows display for `duration` seconds, then wake it."""
+    HWND_BROADCAST = 0xFFFF
+    WM_SYSCOMMAND = 0x0112
+    SC_MONITORPOWER = 0xF170
+    MONITOR_OFF = 2
+    MONITOR_ON = -1
+
+    def _off():
+        ctypes.windll.user32.SendMessageW(
+            HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, MONITOR_OFF
+        )
+
+    def _on():
+        ctypes.windll.user32.SendMessageW(
+            HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, MONITOR_ON
+        )
+
+    _off()
+    threading.Timer(duration, _on).start()
 
 class FatigueEngine:
     def __init__(self, model_path):
@@ -31,6 +54,8 @@ class FatigueEngine:
         self.smoothed_fatigue = 0
         self.drowsy_counter = 0
         self.prev_eye_closed = False
+        self.screen_off_cooldown = 30   # seconds between triggers, avoid re-firing every frame
+        self.last_screen_off_time = 0
 
         self.LEFT_EYE = [33, 160, 158, 133, 153, 144]
         self.RIGHT_EYE = [362, 385, 387, 263, 373, 380]
@@ -99,6 +124,13 @@ class FatigueEngine:
         if self.drowsy_counter >= DROWSY_CONFIRM_FRAMES:
             return "DROWSY"
         return "TIRED"
+    
+    # screen off trigger function
+    def _maybe_trigger_screen_off(self):
+        now = time.time()
+        if now - self.last_screen_off_time > self.screen_off_cooldown:
+            self.last_screen_off_time = now
+            turn_off_screen_for(duration=10)
 
     def process_frame(self, frame):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -136,6 +168,9 @@ class FatigueEngine:
 
             # Classify status
             status = self.classify_status(fatigue_score)
+
+            if status == "DROWSY":
+                self._maybe_trigger_screen_off()
 
         return {
             "status": status,
