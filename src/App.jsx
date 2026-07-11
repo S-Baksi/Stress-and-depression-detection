@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./HomePage";
 import AnalysisPage from "./AnalysisPage";
 import Monitoring from "./driver/Monitoring";
@@ -7,10 +7,19 @@ import DriverAnalytics from "./driver/Analytics";
 import StressPrediction from "./StressPrediction";
 import LoginPage from "./LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
+import EmployeeChatbot from "./EmployeeChatbot";
+import { useLocation } from "react-router-dom";
+
+function ChatbotWidget() {
+  const location = useLocation();
+  if (location.pathname === "/login") return null;
+  return <EmployeeChatbot />;
+}
 
 function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/"
@@ -52,7 +61,10 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+      <ChatbotWidget />
+    </>
   );
 }
 
