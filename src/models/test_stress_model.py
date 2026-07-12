@@ -22,7 +22,7 @@ if sklearn.__version__ != PICKLE_TRAINED_ON_SKLEARN:
           f"but you have {sklearn.__version__} installed. Results may differ slightly. "
           f"Fix with: pip install --upgrade scikit-learn=={PICKLE_TRAINED_ON_SKLEARN}\n")
 
-with open("C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/src/stressfinal.pkl", "rb") as f:
+with open("C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/src/models/stressfinal.pkl", "rb") as f:
     package = pickle.load(f)
 
 preprocessor  = package["preprocessor"]
@@ -40,7 +40,7 @@ RAW_COLUMNS      = NUMERIC_COLS + CATEGORICAL_COLS
 # valid input ranges (soft — for warnings only, model will still run outside these)
 NUMERIC_RANGES = {
     "Age":                  (18, 65),
-    "Sleep_Duration":       (3, 10),
+    "Sleep_Duration":       (3, 10), #3 to 10 hours per day
     "Sleep_Quality":        (1, 5), #1 to 5 rating
     "Physical_Activity":    (0, 6), # 0 to 6  average number of hours per day
     "Screen_Time":          (0, 8), #0 to 8 average hours per day

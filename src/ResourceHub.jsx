@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BookOpen, Play, Search, Clock, Users, Star, Video, Download, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import resources from "./resources.json";
+import resources from "../src/json/resources.json";
 
 const categories = ["All", "Stress", "Anxiety", "Depression", "Nervousness"];
 const tabs = ["All", "Articles", "Audio", "Videos"];

@@ -1,0 +1,10 @@
+[
+  {
+    "empId": "EMP001",
+    "empName": "Employee 1",
+    "age": 34,
+    "bloodPressure": 135,
+    "cholesterol": 195,
+    "bloodSugar": 95
+  }
+]

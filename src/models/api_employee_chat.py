@@ -19,7 +19,7 @@ CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def load_resources(excel_path="C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/resources.xlsx"):
+def load_resources(excel_path="C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/excels/resources.xlsx"):
     df = pd.read_excel(excel_path)
     docs = []
 
@@ -63,7 +63,7 @@ def retrieve_resources(Query, top_k=2):
 
 def generate_llm_explanation(EmployeeId, Query):
     try:
-        df = pd.read_csv("C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/employee_monthly_fatigue_dataset_encoded.csv")
+        df = pd.read_csv("C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/excels/employee_monthly_fatigue_dataset_encoded.csv")
         print("Employee_Id", EmployeeId)
         print("Type",type(EmployeeId))
         emp_data = df.loc[df["employee_id"] == EmployeeId]
