@@ -42,7 +42,7 @@ function BotMessage({ text, links = [], onNavigate }) {
 
 export default function EmployeeChatbot() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
-  const employeeId = user?.employeeId || "EMP001";
+  const employeeId = user?.employeeId || "EMP_001";
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
