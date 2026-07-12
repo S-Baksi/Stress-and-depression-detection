@@ -1,9 +1,49 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, X, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+function BotMessage({ text, links = [], onNavigate }) {
+  return (
+    <span>
+      <span>{text}</span>
+      {links.length > 0 && (
+        <span style={{ display: "flex", flexDirection: "column", gap: "0.375rem", marginTop: "0.625rem" }}>
+          {links.map((link) => (
+            <button
+              key={link.id}
+              onClick={() => onNavigate(link.path)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.375rem",
+                padding: "0.375rem 0.625rem",
+                background: "rgba(79,70,229,0.1)",
+                border: "1px solid rgba(79,70,229,0.25)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                color: "var(--indigo-600)",
+                fontFamily: "inherit",
+                textAlign: "left",
+                transition: "background 150ms",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(79,70,229,0.18)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(79,70,229,0.1)")}
+            >
+              📚 {link.topic}
+            </button>
+          ))}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function EmployeeChatbot() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
   const employeeId = user?.employeeId || "EMP001";
+  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -47,7 +87,7 @@ export default function EmployeeChatbot() {
       const data = await res.json();
       setMessages((prev) => [
         ...prev,
-        { role: "bot", text: data.Response || "Sorry, I couldn't get a response." },
+        { role: "bot", text: data.Response || "Sorry, I couldn't get a response.", links: data.ResourceLinks || [] },
       ]);
     } catch {
       setMessages((prev) => [
@@ -226,7 +266,7 @@ export default function EmployeeChatbot() {
                     border: msg.role === "bot" ? "1px solid var(--border-default)" : "none",
                   }}
                 >
-                  {msg.text}
+                  {msg.role === "bot" ? <BotMessage text={msg.text} links={msg.links} onNavigate={(path) => { sessionStorage.setItem("resource_access", "true"); setOpen(false); navigate(path); }} /> : msg.text}
                 </div>
               </div>
             ))}

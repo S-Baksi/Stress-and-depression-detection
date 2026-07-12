@@ -8,6 +8,7 @@ import StressPrediction from "./StressPrediction";
 import LoginPage from "./LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
 import EmployeeChatbot from "./EmployeeChatbot";
+import ResourcePage from "./ResourcePage";
 import { useLocation } from "react-router-dom";
 
 function ChatbotWidget() {
@@ -58,6 +59,22 @@ function App() {
         element={
           <ProtectedRoute>
             <DriverAnalytics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/resources"
+        element={
+          <ProtectedRoute>
+            <ResourcePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/resources/:id"
+        element={
+          <ProtectedRoute>
+            <ResourcePage />
           </ProtectedRoute>
         }
       />

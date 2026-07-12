@@ -5,6 +5,7 @@ import pickle
 import shap
 import pandas as pd
 import os
+import re
 
 from groq import Groq
 from sentence_transformers import SentenceTransformer
@@ -18,7 +19,7 @@ CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def load_resources(excel_path="C://Users/ASUS/OneDrive/Desktop/projects/Stress-and-depression-detection/resources.xlsx"):
+def load_resources(excel_path="C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/resources.xlsx"):
     df = pd.read_excel(excel_path)
     docs = []
 
@@ -62,7 +63,7 @@ def retrieve_resources(Query, top_k=2):
 
 def generate_llm_explanation(EmployeeId, Query):
     try:
-        df = pd.read_csv(r"C://Users/ASUS/OneDrive/Desktop/projects/Stress-and-depression-detection/employee_monthly_fatigue_dataset_encoded.csv")
+        df = pd.read_csv("C:/Users/ASUS/OneDrive/Desktop/Stress-and-depression-detection/employee_monthly_fatigue_dataset_encoded.csv")
         print("Employee_Id", EmployeeId)
         print("Type",type(EmployeeId))
         emp_data = df.loc[df["employee_id"] == EmployeeId]
@@ -93,7 +94,7 @@ def generate_llm_explanation(EmployeeId, Query):
             2. Use the health assessment only if it helps answer the question.
             3. Never mention words like "based on the assessment", "according to the data", or "AI detected".
             4. If no health assessment exists, politely recommend completing the Stress, Mental Fatigue and Ocular Fatigue assessments.
-            5. Recommend only relevant resources.
+            5. If resources are provided, recommend them naturally and include their route path exactly as given (e.g. /resources) so the user can click to visit.
             6. Keep the response under 150 words.
             7. Sound conversational instead of robotic.
             """
@@ -108,11 +109,29 @@ def generate_llm_explanation(EmployeeId, Query):
             max_tokens=600
         )
 
-        return response.choices[0].message.content
+        llm_text = response.choices[0].message.content
+
+        # Extract resource IDs from URLs like localhost:5173/resources/1
+        id_pattern = re.compile(r'/resources/([\d]+)')
+        seen = set()
+        resource_links = []
+        for r in resources:
+            match = id_pattern.search(r["Route"])
+            if match:
+                rid = match.group(1)
+                if rid not in seen:
+                    seen.add(rid)
+                    resource_links.append({
+                        "id": rid,
+                        "topic": r["Topic"],
+                        "path": f"/resources/{rid}"
+                    })
+
+        return llm_text, resource_links
 
     except Exception as e:
         print("LLM Error:", e)
-        return f"Sorry, I ran into an issue: {str(e)}"
+        return f"Sorry, I ran into an issue: {str(e)}", []
 
 
 @app.route("/EmployeeChat", methods=["POST", "OPTIONS"])
@@ -137,9 +156,9 @@ def predict():
         if not query:
             return jsonify({"error": "Query is required"}), 400
 
-        llm_response = generate_llm_explanation(employee_id, query)
+        llm_response, resource_links = generate_llm_explanation(employee_id, query)
 
-        return jsonify({"Response": llm_response})
+        return jsonify({"Response": llm_response, "ResourceLinks": resource_links})
 
     except Exception as e:
         print("Route Error:", e)
