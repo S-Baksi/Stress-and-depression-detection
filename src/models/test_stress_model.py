@@ -15,6 +15,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import sklearn
+import shap
 
 PICKLE_TRAINED_ON_SKLEARN = "1.6.1"
 if sklearn.__version__ != PICKLE_TRAINED_ON_SKLEARN:
@@ -32,6 +33,7 @@ pca           = package["pca"]
 model         = package["model"]
 label_encoder = package["label_encoder"]
 selected_features = package["selected_features"]
+explainer = shap.TreeExplainer(model)
 
 NUMERIC_COLS     = list(preprocessor.transformers_[0][2])   # 13 numeric raw cols
 CATEGORICAL_COLS = list(preprocessor.transformers_[1][2])   # 8 categorical raw cols
@@ -40,15 +42,15 @@ RAW_COLUMNS      = NUMERIC_COLS + CATEGORICAL_COLS
 # valid input ranges (soft — for warnings only, model will still run outside these)
 NUMERIC_RANGES = {
     "Age":                  (18, 65),
-    "Sleep_Duration":       (3, 10), #3 to 10 hours per day
-    "Sleep_Quality":        (1, 5), #1 to 5 rating
-    "Physical_Activity":    (0, 6), # 0 to 6  average number of hours per day
-    "Screen_Time":          (0, 8), #0 to 8 average hours per day
-    "Caffeine_Intake":      (0, 5), #0 to 5 number of glasses of caffein in a day
-    "Alcohol_Intake":       (0, 3), #0 to 3 number of glasses of alcohol in a day
-    "Work_Hours":           (4, 12), #4 to 12 hours per day
-    "Travel_Time":          (0, 6), #0 to 6 hours per day
-    "Social_Interactions":  (0, 7), #0 to 7 average number of hours per day
+    "Sleep_Duration":       (3, 10),
+    "Sleep_Quality":        (1, 5),
+    "Physical_Activity":    (0, 6),
+    "Screen_Time":          (0, 8),
+    "Caffeine_Intake":      (0, 5),
+    "Alcohol_Intake":       (0, 3),
+    "Work_Hours":           (4, 12),
+    "Travel_Time":          (0, 6),
+    "Social_Interactions":  (0, 7),
     "Blood_Pressure":       (90, 180),
     "Cholesterol_Level":    (150, 280),
     "Blood_Sugar_Level":    (70, 160),
@@ -112,7 +114,59 @@ def predict_stress(user_input: dict, verbose: bool = True):
     X_pca    = pca.transform(X_scaled)
 
     pred  = model.predict(X_pca)[0]
+
     proba = model.predict_proba(X_pca)[0]
+
+    # ==========================
+    # SHAP on PCA Components
+    # ==========================
+
+    shap_values = explainer.shap_values(X_pca)
+
+    # Handle different SHAP versions
+    if isinstance(shap_values, list):
+        pc_shap = shap_values[pred][0]
+    else:
+        pc_shap = shap_values[0, :, pred]
+
+    # ==========================
+    # Project SHAP back to original features
+    # ==========================
+
+    loadings = pca.components_        # (9,14)
+
+    original_shap = loadings.T @ pc_shap
+
+    feature_importance = pd.DataFrame({
+        "Feature": selected_features,
+        "SHAP": original_shap
+    })
+
+    feature_importance["AbsSHAP"] = feature_importance["SHAP"].abs()
+
+    feature_importance = feature_importance.sort_values(
+        by="AbsSHAP",
+        ascending=False
+    )
+
+    stress_features = (
+    feature_importance[feature_importance["SHAP"] > 0]
+    .nlargest(3, "SHAP")
+)
+
+    for _, row in stress_features.iterrows():
+        print(f"{row.Feature:25s} +{row.SHAP:.4f}")
+    print("\nProtective Factors")
+    print("-"*40)
+
+    protective_features = (
+    feature_importance[feature_importance["SHAP"] < 0]
+    .nsmallest(3, "SHAP")
+)
+    
+
+    for _, row in protective_features.iterrows():
+        print(f"{row.Feature:25s} {row.SHAP:.4f}")
 
     predicted_name = label_encoder.inverse_transform([pred])[0]
     name_to_out    = {"Low": 0, "Medium": 1, "High": 2}
@@ -122,7 +176,12 @@ def predict_stress(user_input: dict, verbose: bool = True):
         print("\nPredicted stress level:", predicted_name)
         print("Predicted code (0=Low, 1=Medium, 2=High):", predicted_code)
 
-    return predicted_name, predicted_code
+    return (
+        predicted_name,
+        predicted_code,
+        stress_features.reset_index(drop=True),
+        protective_features.reset_index(drop=True)
+    )
 
 """
 if __name__ == "__main__":
