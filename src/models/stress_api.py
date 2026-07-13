@@ -2,11 +2,13 @@ import pickle
 import numpy as np
 import pandas as pd
 import test_stress_model as stress_pred
+from flask_cors import CORS
 
 from flask import Flask, render_template, request, jsonify
 
 
 app = Flask(__name__)
+CORS(app)
 @app.route("/getstressprediction", methods=["POST"])
 def stressprediction():
     try :

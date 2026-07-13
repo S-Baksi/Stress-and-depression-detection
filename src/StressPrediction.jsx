@@ -3,9 +3,32 @@ import { Activity, CheckCircle, AlertTriangle, Lock, Info, ChevronRight, Chevron
 import toast, { Toaster } from "react-hot-toast";
 import Header from "./Header";
 import Footer from "./Footer";
-import employeeHealthData from "./employeeHealth.json";
+import employeeHealthData from "../src/json/employeeHealth.json";
 
 const STRESS_API_URL = "http://localhost:5005/getstressprediction";
+
+const FEATURE_LABELS = {
+  "num__Age": "Age",
+  "num__Blood_Sugar_Level": "Blood Sugar Level",
+  "num__Cholesterol_Level": "Cholesterol Level",
+  "num__Blood_Pressure": "Blood Pressure",
+  "num__Caffeine_Intake": "Caffeine Intake",
+  "num__Work_Hours": "Work Hours",
+  "num__Travel_Time": "Travel Time",
+  "num__Screen_Time": "Screen Time",
+  "num__Sleep_Duration": "Sleep Duration",
+  "num__Alcohol_Intake": "Alcohol Intake",
+  "num__Physical_Activity": "Physical Activity",
+  "num__Social_Interactions": "Social Interactions",
+  "num__Sleep_Quality": "Sleep Quality",
+};
+
+function getFeatureLabel(raw) {
+  if (FEATURE_LABELS[raw]) return FEATURE_LABELS[raw];
+  // cat__Bed_Time_* → "Bed Time"
+  if (raw.startsWith("cat__Bed_Time")) return "Bed Time";
+  return raw.replace(/^(num__|cat__)/, "").replace(/_/g, " ");
+}
 
 const STRESS_LEVEL_MAP = {
   0: { label: "Low",    color: "#10b981", bg: "rgba(16,185,129,0.08)",  border: "rgba(16,185,129,0.25)" },
@@ -14,15 +37,15 @@ const STRESS_LEVEL_MAP = {
 };
 
 const FIELDS = {
-  sleepDuration:      { min: 3,  max: 10, step: 0.5, unit: "hrs",   label: "Sleep Duration",      tip: "Total hours of sleep last night. Healthy adults need 7–9 hrs." },
-  sleepQuality:       { min: 1,  max: 5,  step: 1,   unit: "/5",    label: "Sleep Quality",       tip: "How restful was your sleep? 1 = very poor, 5 = excellent." },
-  physicalActivity:   { min: 0,  max: 6,  step: 0.5, unit: "hrs",   label: "Physical Activity",   tip: "Hours of exercise or movement today (0–6 hrs)." },
-  screenTime:         { min: 0,  max: 8,  step: 0.5, unit: "hrs",   label: "Screen Time",         tip: "Total hours on screens (phone, PC, TV) today (0–8 hrs)." },
-  caffeineIntake:     { min: 0,  max: 5,  step: 1,   unit: "cups",  label: "Caffeine Intake",     tip: "Caffeinated drinks consumed today — coffee, tea, energy drinks (0–5)." },
-  alcoholIntake:      { min: 0,  max: 3,  step: 1,   unit: "units", label: "Alcohol Intake",      tip: "Alcoholic drinks consumed today (0–3 units)." },
-  workHours:          { min: 4,  max: 12, step: 0.5, unit: "hrs",   label: "Work Hours",          tip: "Total hours worked today including overtime (4–12 hrs)." },
-  travelTime:         { min: 0,  max: 6,  step: 0.5, unit: "hrs",   label: "Travel / Commute",    tip: "Total commute or travel time today (0–6 hrs)." },
-  socialInteractions: { min: 0,  max: 7,  step: 1,   unit: "hrs",   label: "Social Interactions", tip: "Hours spent in meaningful social interactions today (0–7 hrs)." },
+  sleepDuration: { min: 3, max: 10, step: 0.5, unit: "hrs", label: "Sleep Duration (hours/night)", tip: "Total hours of sleep last night. Healthy adults need 7–9 hrs." },
+  sleepQuality: { min: 1, max: 5, step: 1, unit: "/5", label: "Sleep Quality (Scale 1–5)", tip: "How restful was your sleep? 1 = very poor, 5 = excellent." },
+  physicalActivity: { min: 0, max: 6, step: 0.5, unit: "hrs", label: "Physical Activity (hours/day)", tip: "Hours of exercise or movement today (0–6 hrs)." },
+  screenTime: { min: 0, max: 8, step: 0.5, unit: "hrs", label: "Screen Time (hours/day)", tip: "Total hours on screens (phone, PC, TV) today (0–8 hrs)." },
+  caffeineIntake: { min: 0, max: 5, step: 1, unit: "cups/day", label: "Caffeine Intake (cups/day)", tip: "Caffeinated drinks consumed today — coffee, tea, energy drinks (0–5)." },
+  alcoholIntake: { min: 0, max: 3, step: 1, unit: "cups/day", label: "Alcohol Intake (cups/day)", tip: "Alcoholic drinks consumed today (0–3 units)." },
+  workHours: { min: 4, max: 12, step: 0.5, unit: "hrs", label: "Work Hours (hours/day)", tip: "Total hours worked today including overtime (4–12 hrs)." },
+  travelTime: { min: 0, max: 6, step: 0.5, unit: "hrs", label: "Travel Time (hours/day)", tip: "Total commute or travel time today (0–6 hrs)." },
+  socialInteractions: { min: 0, max: 7, step: 1, unit: "count/day", label: "Social Interactions (count/day)", tip: "Meaningful social interactions today (0–7)." },
 };
 
 // Step 1 keys, Step 2 keys
@@ -97,7 +120,8 @@ export default function StressPrediction() {
   );
   const [bedTime, setBedTime] = useState("");
   const [isPredicting, setIsPredicting] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(null);   // PredictedClassCode
+  const [apiData, setApiData] = useState(null);  // full response
 
   const setField = (key) => (val) => setFields((p) => ({ ...p, [key]: val }));
 
@@ -141,7 +165,8 @@ export default function StressPrediction() {
       const data = await res.json();
       if (data.PredictedClassCode === undefined) throw new Error("Unexpected response format.");
       setResult(data.PredictedClassCode);
-      setStep(3); // result step
+      setApiData(data);
+      setStep(3);
       toast.success("Prediction complete.");
     } catch (err) {
       toast.error(err.message || "Could not reach the stress API on port 5005.");
@@ -337,7 +362,29 @@ export default function StressPrediction() {
                 </p>
               </div>
 
-              <button onClick={() => { setStep(0); setResult(null); }} className="btn-secondary" style={{ width: "100%", padding: "0.625rem", fontSize: "0.875rem" }}>
+              {/* Stress & Protective Factors */}
+              {(apiData?.StressFactors?.length > 0 || apiData?.ProtectiveFactors?.length > 0) && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.25rem", textAlign: "left" }}>
+                  <div style={{ padding: "0.75rem", borderRadius: "0.625rem", background: "rgba(244,63,94,0.06)", border: "1px solid rgba(244,63,94,0.2)" }}>
+                    <p style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#f43f5e", marginBottom: "0.5rem" }}>⬆ Stress Factors</p>
+                    {(apiData.StressFactors || []).map((f) => (
+                      <div key={f.Feature} style={{ marginBottom: "0.4rem" }}>
+                        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-body)" }}>{getFeatureLabel(f.Feature)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ padding: "0.75rem", borderRadius: "0.625rem", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)" }}>
+                    <p style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#10b981", marginBottom: "0.5rem" }}>⬇ Protective Factors</p>
+                    {(apiData.ProtectiveFactors || []).map((f) => (
+                      <div key={f.Feature} style={{ marginBottom: "0.4rem" }}>
+                        <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-body)" }}>{getFeatureLabel(f.Feature)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button onClick={() => { setStep(0); setResult(null); setApiData(null); }} className="btn-secondary" style={{ width: "100%", padding: "0.625rem", fontSize: "0.875rem" }}>
                 Start Over
               </button>
             </div>
