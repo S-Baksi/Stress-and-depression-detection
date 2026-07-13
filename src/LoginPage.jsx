@@ -2,25 +2,11 @@ import { useState } from 'react';
 import { Lock, Mail, Users, ArrowRight, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
-
-// Static credentials
-const CREDENTIALS = {
-  employee: {
-    email: 'employee@company.com',
-    password: 'employee123',
-    role: 'employee'
-  },
-  manager: {
-    email: 'manager@company.com',
-    password: 'manager123',
-    role: 'manager'
-  }
-};
+import employeeData from './json/employeeHealth.json';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('employee');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -30,26 +16,25 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    // Simulate loading delay
     setTimeout(() => {
-      const credentials = CREDENTIALS[role];
+      // Check manager credentials
+      if (email === 'manager@company.com' && password === 'manager123') {
+        localStorage.setItem('user', JSON.stringify({ email, role: 'manager', isAuthenticated: true }));
+        window.location.href = 'http://127.0.0.1:9023';
+        return;
+      }
 
-      if (email === credentials.email && password === credentials.password) {
-        // Store user info in localStorage
+      // Check employee credentials from JSON
+      const emp = employeeData.find((e) => e.email === email && e.password === password);
+      if (emp) {
         localStorage.setItem('user', JSON.stringify({
-          email,
-          role,
-          isAuthenticated: true
+          email: emp.email,
+          role: 'employee',
+          isAuthenticated: true,
+          employeeId: emp.empId,
+          empName: emp.empName,
         }));
-
-        // Redirect based on role
-        if (role === 'manager') {
-          // Redirect to manager dashboard
-          window.location.href = 'http://127.0.0.1:9023';
-        } else {
-          // Navigate to employee homepage
-          navigate('/');
-        }
+        navigate('/');
       } else {
         setError('Invalid email or password. Please try again.');
         setLoading(false);
@@ -126,23 +111,6 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin} className="login-form">
-            {/* Role Selection */}
-            <div className="form-group">
-              <label htmlFor="role">
-                <Users size={18} />
-                Login As
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="form-input"
-              >
-                <option value="employee">Employee</option>
-                <option value="manager">Manager</option>
-              </select>
-            </div>
-
             {/* Email Input */}
             <div className="form-group">
               <label htmlFor="email">
@@ -198,9 +166,9 @@ export default function LoginPage() {
             <p className="demo-title">Demo Credentials</p>
             <div className="credentials-grid">
               <div className="credential-card">
-                <p className="credential-role">Employee</p>
-                <p className="credential-detail">employee@company.com</p>
-                <p className="credential-detail">employee123</p>
+                <p className="credential-role">Employee (sample)</p>
+                <p className="credential-detail">debdip.bhattacharya@company.com</p>
+                <p className="credential-detail">Debdip@123</p>
               </div>
               <div className="credential-card">
                 <p className="credential-role">Manager</p>

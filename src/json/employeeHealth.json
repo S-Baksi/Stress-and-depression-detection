@@ -1,10 +1,102 @@
 [
   {
-    "empId": "EMP001",
-    "empName": "Employee 1",
+    "empId": "EMP_001",
+    "empName": "Debdip Bhattacharya",
     "age": 34,
     "bloodPressure": 135,
     "cholesterol": 195,
-    "bloodSugar": 95
+    "bloodSugar": 95,
+    "email": "debdip.bhattacharya@company.com",
+    "password": "Debdip@123"
+  },
+  {
+    "empId": "EMP_002",
+    "empName": "Ayush Saha Roy",
+    "age": 29,
+    "bloodPressure": 122,
+    "cholesterol": 180,
+    "bloodSugar": 90,
+    "email": "ayush.saharoy@company.com",
+    "password": "Ayush@123"
+  },
+  {
+    "empId": "EMP_003",
+    "empName": "Sulagna Dutta",
+    "age": 31,
+    "bloodPressure": 128,
+    "cholesterol": 188,
+    "bloodSugar": 94,
+    "email": "sulagna.dutta@company.com",
+    "password": "Sulagna@123"
+  },
+  {
+    "empId": "EMP_004",
+    "empName": "Sahil Kumar Singh",
+    "age": 27,
+    "bloodPressure": 118,
+    "cholesterol": 176,
+    "bloodSugar": 89,
+    "email": "sahil.singh@company.com",
+    "password": "Sahil@123"
+  },
+  {
+    "empId": "EMP_005",
+    "empName": "Soumalya Bakshi",
+    "age": 35,
+    "bloodPressure": 132,
+    "cholesterol": 192,
+    "bloodSugar": 98,
+    "email": "soumalya.bakshi@company.com",
+    "password": "Soumalya@123"
+  },
+  {
+    "empId": "EMP_006",
+    "empName": "Disha Bhattacharya",
+    "age": 30,
+    "bloodPressure": 124,
+    "cholesterol": 184,
+    "bloodSugar": 92,
+    "email": "disha.bhattacharya@company.com",
+    "password": "Disha@123"
+  },
+  {
+    "empId": "EMP_007",
+    "empName": "Muskan Agarwal",
+    "age": 26,
+    "bloodPressure": 116,
+    "cholesterol": 170,
+    "bloodSugar": 87,
+    "email": "muskan.agarwal@company.com",
+    "password": "Muskan@123"
+  },
+  {
+    "empId": "EMP_008",
+    "empName": "Rudrokanto de",
+    "age": 33,
+    "bloodPressure": 130,
+    "cholesterol": 190,
+    "bloodSugar": 96,
+    "email": "rudrokanto.de@company.com",
+    "password": "Rudrokanto@123"
+  },
+  {
+    "empId": "EMP_009",
+    "empName": "Snehashis Dey",
+    "age": 32,
+    "bloodPressure": 126,
+    "cholesterol": 186,
+    "bloodSugar": 93,
+    "email": "snehashis.dey@company.com",
+    "password": "Snehashis@123"
+  },
+  {
+    "empId": "EMP_010",
+    "empName": "Auvik Singh",
+    "age": 28,
+    "bloodPressure": 120,
+    "cholesterol": 178,
+    "bloodSugar": 91,
+    "email": "auvik.singh@company.com",
+    "password": "Auvik@123"
   }
 ]

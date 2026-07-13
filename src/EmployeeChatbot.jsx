@@ -82,7 +82,7 @@ export default function EmployeeChatbot() {
       const res = await fetch("http://localhost:9091/EmployeeChat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Employee_Id: employeeId, Query: query } ),
+        body: JSON.stringify({ Employee_Id: employeeId, Query: query }),
       });
       const data = await res.json();
       setMessages((prev) => [

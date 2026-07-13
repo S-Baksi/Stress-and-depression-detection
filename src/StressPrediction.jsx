@@ -31,9 +31,9 @@ function getFeatureLabel(raw) {
 }
 
 const STRESS_LEVEL_MAP = {
-  0: { label: "Low",    color: "#10b981", bg: "rgba(16,185,129,0.08)",  border: "rgba(16,185,129,0.25)" },
-  1: { label: "Medium", color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.25)" },
-  2: { label: "High",   color: "#f43f5e", bg: "rgba(244,63,94,0.08)",   border: "rgba(244,63,94,0.25)"  },
+  0: { label: "Low", color: "#10b981", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.25)" },
+  1: { label: "Medium", color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)" },
+  2: { label: "High", color: "#f43f5e", bg: "rgba(244,63,94,0.08)", border: "rgba(244,63,94,0.25)" },
 };
 
 const FIELDS = {
@@ -55,10 +55,10 @@ const STEPS = [
 ];
 
 const STATIC_TIPS = {
-  age:           "Your age. Used to calibrate stress risk thresholds.",
+  age: "Your age. Used to calibrate stress risk thresholds.",
   bloodPressure: "Systolic blood pressure (mmHg). Elevated BP >130 is linked to higher stress.",
-  cholesterol:   "Total cholesterol (mg/dL). Chronic stress can raise cholesterol.",
-  bloodSugar:    "Fasting blood sugar (mg/dL). Stress hormones can elevate blood sugar.",
+  cholesterol: "Total cholesterol (mg/dL). Chronic stress can raise cholesterol.",
+  bloodSugar: "Fasting blood sugar (mg/dL). Stress hormones can elevate blood sugar.",
 };
 
 function getEmployeeHealth(empId) {
@@ -186,7 +186,7 @@ export default function StressPrediction() {
         duration: 4000,
         style: { background: "#fff", color: "var(--text-heading)", border: "1px solid var(--border-default)", borderRadius: "10px", padding: "12px 16px", fontSize: "13px", fontWeight: 500 },
         success: { iconTheme: { primary: "#10b981", secondary: "#fff" } },
-        error:   { iconTheme: { primary: "#f43f5e", secondary: "#fff" } },
+        error: { iconTheme: { primary: "#f43f5e", secondary: "#fff" } },
       }} />
 
       <Header />
