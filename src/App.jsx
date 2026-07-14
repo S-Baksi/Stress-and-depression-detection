@@ -11,6 +11,12 @@ import EmployeeChatbot from "./EmployeeChatbot";
 import ResourcePage from "./ResourcePage";
 import { useLocation } from "react-router-dom";
 
+function PublicRoute({ children }) {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (user?.isAuthenticated) return <Navigate to="/" replace />;
+  return children;
+}
+
 function ChatbotWidget() {
   const location = useLocation();
   if (location.pathname === "/login") return null;
@@ -21,7 +27,7 @@ function App() {
   return (
     <>
       <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route
         path="/"
         element={
