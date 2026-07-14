@@ -1,15 +1,28 @@
+# ── Web Frameworks ──────────────────────────────────────────
 flask
 flask-cors
-python-dotenv
-groq
+fastapi
+uvicorn
+
+# ── ML / Data Science ───────────────────────────────────────
 numpy
 pandas
+scikit-learn==1.6.1
 scipy
-requests
-openpyxl
 shap
+xgboost
+
+# ── Deep Learning ────────────────────────────────────────────
+# torch  # install separately from https://pytorch.org (CPU or CUDA build)
+
+# ── NLP / Embeddings ─────────────────────────────────────────
 sentence-transformers
 faiss-cpu
-scikit-learn
-xgboost
-torch
+groq
+
+# ── Computer Vision ──────────────────────────────────────────
+opencv-python
+mediapipe
+
+# ── Utilities ────────────────────────────────────────────────
+openpyxl
