@@ -50,8 +50,7 @@ function HomePage() {
 
               <div className="flex gap-8 pt-6" style={{ borderTop: '1px solid var(--border-default)' }}>
                 {[
-                  { value: "2", label: "Detection Methods" },
-                  { value: "95%", label: "Accuracy" },
+                  { value: "3", label: "Detection Methods" },
                   { value: "Free", label: "Open Access" }
                 ].map((stat) => (
                   <div key={stat.label}>
