@@ -45,7 +45,7 @@ const FIELDS = {
   alcoholIntake: { min: 0, max: 3, step: 1, unit: "cups/day", label: "Alcohol Intake (cups/day)", tip: "Alcoholic drinks consumed today (0–3 units)." },
   workHours: { min: 4, max: 12, step: 0.5, unit: "hrs", label: "Work Hours (hours/day)", tip: "Total hours worked today including overtime (4–12 hrs)." },
   travelTime: { min: 0, max: 6, step: 0.5, unit: "hrs", label: "Travel Time (hours/day)", tip: "Total commute or travel time today (0–6 hrs)." },
-  socialInteractions: { min: 0, max: 7, step: 1, unit: "hour", label: "Social Interactions (hour/day)", tip: "Meaningful social interactions today (0–7)." },
+  socialInteractions: { min: 0, max: 7, step: 1, unit: "hours", label: "Social Interactions (hours/day)", tip: "Meaningful social interactions today (0–7)." },
 };
 
 // Step 1 keys, Step 2 keys
